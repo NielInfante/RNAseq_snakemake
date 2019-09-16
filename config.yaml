@@ -1,0 +1,38 @@
+samples:
+    Con_1:  Con_1
+    Con_2:  Con_2
+    Con_3:  Con_3
+    T_120d_1: T_120d_1
+    T_120d_2: T_120d_2
+    T_120d_3: T_120d_3
+    T_14d_1:  T_14d_1
+    T_14d_2:  T_14d_2
+    T_14d_3:  T_14d_3
+    T_30d_1:  T_30d_1
+    T_30d_2:  T_30d_2
+    T_30d_3:  T_30d_3
+    T_3d_1: T_3d_1
+    T_3d_2: T_3d_2
+    T_3d_3: T_3d_3
+    T_3h_1: T_3h_1
+    T_3h_2: T_3h_2
+    T_3h_3: T_3h_3
+    T_60d_1:  T_60d_1
+    T_60d_2:  T_60d_2
+    T_60d_3:  T_60d_3
+    T_6d_1: T_6d_1
+    T_6d_2: T_6d_2
+    T_6d_3: T_6d_3
+    T_8h_1: T_8h_1
+    T_8h_2: T_8h_2
+    T_8h_3: T_8h_3
+    T_9d_1: T_9d_1
+    T_9d_2: T_9d_2
+    T_9d_3: T_9d_3
+    T_wo_1: T_wo_1
+    T_wo_2: T_wo_2
+    T_wo_3: T_wo_3
+input_file_suffix: .fq.gz
+reads_folder: reads
+reference_base: Data/hg38_rna
+salmon_bootstraps: 3

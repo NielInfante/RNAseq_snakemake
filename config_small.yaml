@@ -1,0 +1,19 @@
+samples:
+    Con_1:  Con_1
+    Con_2:  Con_2
+    Con_3:  Con_3
+    T_120d_1: T_120d_1
+    T_120d_2: T_120d_2
+    T_120d_3: T_120d_3
+reads_folder: reads
+input_file_suffix: .fq.gz
+reference_base: Data/hg38_rna
+salmon_bootstraps: 3
+
+# Differential Analysis
+metadata_file: meta.txt
+experiments:
+  120d:
+    prefix: 120d
+    filter: Time == '120d' | Time == '0'
+    
