@@ -22,7 +22,8 @@ rule all:
 
         "report.html",
 #        expand("salmon/{sample}", sample=config["samples"])
-        expand("salmon/{sample}", sample=config["samples"])
+        expand("salmon/{sample}", sample=config["samples"]),
+        expand("deseq/{experiment}/config.R", experiment=config["experiments"])
 
 
 rule fastqc:
@@ -34,7 +35,6 @@ rule fastqc:
     threads: 16
     shell:
         "fastqc -t {threads} {input} -o FastQC"
-
 
 
 
@@ -63,6 +63,18 @@ rule salmon_quantification:
     threads: 16
     shell:
         "salmon quant -i {input.ref} --libType A --gcBias --numBootstraps {params.bootstraps} -p {threads} -1 {input.forward} -2 {input.reverse} -o {output.out} --validateMappings"
+
+
+# This rule will create an R config file to be used by doDESeq.R
+rule create_cofig_for_deseq:
+    output:
+        temp("deseq/{experiment}/config.R")
+    shell:
+        "touch {output}"
+
+#  Want python commands here to take config params and write a R file so that doDEseq can source it.
+
+
 
 
 rule report:
