@@ -21,7 +21,8 @@ rule all:
 
         "report.html",
         expand("salmon/{sample}", sample=config["samples"]),
-        expand("deseq/{experiment}/config.R", experiment=config["experiments"])
+        expand("deseq/{experiment}/config.R", experiment=config["experiments"]),
+#        expand("deseq/{experiment}/dds.rds", experiment=config["experiments"])
 
 
 rule fastqc:
@@ -83,15 +84,28 @@ rule create_cofig_for_deseq:
         file.write("contrast <- {}\n\n".format(config['experiments'][exp]['contrast']))
 
         file.write("meta <- meta %>% filter({})\n".format(config['experiments'][exp]['filter']))
+        file.write("tx2Gene_file <- {}\n".format(config['tx2gene']))
+        file.write("samples <- meta${}\n".format(config['sample_column']))
+        file.write("meta$Display <- meta${}\n".format(config['experiments'][exp]['display_column']))
 
-
+#        file.write("{}\n".format(config['experiments'][exp]['']))
+#        file.write("{}\n".format(config['experiments'][exp]['']))
 #        file.write("{}\n".format(config['experiments'][exp]['']))
 #        file.write("{}\n".format(config['experiments'][exp]['']))
 
         file.close()
 
 
-
+rule do_deseq:
+    input:
+        lambda wildcards: f"deseq/{[wildcards.experiment]}/config.R"
+    output:
+        "deseq/{experiment}/dds.rds",
+        "deseq/{experiment}/results.txt"
+    params:
+        exp = lambda wildcards: f"{wildcards.experiment}"
+    shell:
+        "Rscript scripts/doDESeq.R {params.exp} {config[metadata_file]} {config[tx2gene]}"
 
 
 

@@ -11,66 +11,25 @@ library(ggplot2)
 library(ggrepel)
 library(gplots)
 
+
+# Assume this script will be invoked with the arguments (in order):
+# prefix  
+# metadata_file
+
+args <- commandArgs()
+
+meta <- read_tsv(args[2])
+
+source(paste0('deseq/', args[1], '/config.R'))
+
+
+outDir <- "deseq"
+
 my_concat <- function(x){paste(x, sep="|", collapse="|")}
 
-# Organism
-library('org.Hs.eg.db')
-orgDB <- org.Hs.eg.db
-
-# Input and Output
-
-directory<-"~/depot/projects/Ma/July_2018/"
-outDir <- "~/depot/projects/Ma/July_2018/deseq"
-outPrefix <- 'Group_Early_Late'
-
-setwd(directory)
-
-# The Stats
-
-PCA_Group <- 'Group'
-design =~ Group 
-contrast <- c('Group','Early','Late')
+tx2gene <- read_tsv(args[3])
 
 
-
-
-tx2gene <- read.table('hg38/IDs', header=T, sep="\t", stringsAsFactors = F)
-
-metadata <- read.table('meta', header = T, sep="\t", stringsAsFactors = T)
-
-meta <- metadata %>% dplyr::filter(Group %in% c('Late', 'Early'))
-
-
-
-
-timePoint <- c('0','120d','14d','30d','3d','3h','60d','6d','8h','9d','wo')
-for(idx1 in 1:10){
-	for (idx2 in (idx1+1):11){
-		G1 <- timePoint[idx1]
-		G2 <- timePoint[idx2]
-		print(paste("G1 is",G1,"and G2 is ",G2))
-		meta <- metadata %>% filter(Time %in% c(G1,G2))
-		
-		contrast <- c('Time',G1,G2)
-		outPrefix <- paste0("Time_",G1,"_",G2)
-		
-		
-		doItAll()		
-		
-	}
-}
-
-
-
-#G1 <- '0'
-#G2 <- '120d'
-
-
-doItAll <- function(){
-
-
-#meta <- metadata %>% filter(Time == '0' | Time =='120d')
-#meta <- metadata
 meta$ID <- meta$Sample
 samples <- meta$ID
 
@@ -277,4 +236,4 @@ legend("topleft", legend = c("FDR<0.05", "|LFC|>2", "both"), pch = 16, col = c("
 
 dev.off()
 
-}
+
