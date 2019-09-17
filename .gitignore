@@ -3,4 +3,6 @@ Data/
 reads/
 FastQC/
 salmon/
+deseq/
 .snakemake/
+report.html

@@ -7,3 +7,8 @@ First step: create a conda environment to run in
  conda env create -f environment.yml
 
  ```
+
+
+ Second step: Get the R environment set up.
+
+ How?? Maybe use conda as well.

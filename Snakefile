@@ -17,11 +17,9 @@ READ_SUFFIX = config['input_file_suffix']
 
 rule all:
     input:
-#        expand("FastQC/{sample}_{num}{suffix}_fastqc.zip", sample=config["samples"], num=['1', '2'], suffix=config['input_file_suffix']),
         expand("FastQC/{sample}_{num}_fastqc.zip", sample=config["samples"], num=['1', '2']),
 
         "report.html",
-#        expand("salmon/{sample}", sample=config["samples"])
         expand("salmon/{sample}", sample=config["samples"]),
         expand("deseq/{experiment}/config.R", experiment=config["experiments"])
 
@@ -68,11 +66,31 @@ rule salmon_quantification:
 # This rule will create an R config file to be used by doDESeq.R
 rule create_cofig_for_deseq:
     output:
-        temp("deseq/{experiment}/config.R")
-    shell:
-        "touch {output}"
+#        temp("deseq/{experiment}/config.R")
+        file="deseq/{experiment}/config.R"
+    run:
+        exp=output[0].split("/")[1]
+        print(exp)
 
-#  Want python commands here to take config params and write a R file so that doDEseq can source it.
+        file = open(output[0],'w')
+
+        file.write("library('{}')\n".format(config['experiments'][exp]['organism']))
+        file.write("orgDB <- {})\n\n".format(config['experiments'][exp]['organism']))
+
+        file.write("outPrefix <- '{}'\n".format(config['experiments'][exp]['prefix']) )
+        file.write("PCA_Group <- '{}'\n".format(config['experiments'][exp]['PCA_Group']))
+        file.write("design =~ {}\n".format(config['experiments'][exp]['design']))
+        file.write("contrast <- {}\n\n".format(config['experiments'][exp]['contrast']))
+
+        file.write("meta <- meta %>% filter({})\n".format(config['experiments'][exp]['filter']))
+
+
+#        file.write("{}\n".format(config['experiments'][exp]['']))
+#        file.write("{}\n".format(config['experiments'][exp]['']))
+
+        file.close()
+
+
 
 
 
