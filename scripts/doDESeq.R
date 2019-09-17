@@ -15,6 +15,7 @@ library(gplots)
 # Assume this script will be invoked with the arguments (in order):
 # prefix  
 # metadata_file
+# tx2gene
 
 args <- commandArgs()
 
@@ -25,49 +26,28 @@ source(paste0('deseq/', args[1], '/config.R'))
 
 outDir <- "deseq"
 
-my_concat <- function(x){paste(x, sep="|", collapse="|")}
-
-tx2gene <- read_tsv(args[3])
-
-
-meta$ID <- meta$Sample
-samples <- meta$ID
-
-files <- paste0(directory, 'salmon/', samples, '/quant.sf')
+files <- paste0('salmon/', samples, '/quant.sf')
 
 txi <- tximport(files, type='salmon', tx2gene = tx2gene)
 
 dds <- DESeqDataSetFromTximport(txi, meta, design)
-#dds$Type %<>% relevel('C')
-
-
-vsd <- vst(dds, blind=F)
 
 # How many genes, out of those with at least a single count, have three samples with a count of 10 or more
 dds <- dds[rowSums(counts(dds)) > 0,]
 keep <- rowSums(counts(dds) >= 10) >= 3
-#table(keep)
 dds <- dds[keep,] # filter them out
-
 
 dds <- DESeq(dds)
 
 res<-results(dds, contrast=contrast)
 res<-res[order(res$padj),]
 res <- as.data.frame(res)
-head(res)
 
 # Save dds
-saveRDS(dds, paste0(outDir, '/', outPrefix, '_dds.rds'))
-
+saveRDS(dds, paste0(outDir, '/', outPrefix, '/dds.rds'))
 
 
 my_concat <- function(x){paste(x, sep="|", collapse="|")}
-
-# Organism
-library('org.Hs.eg.db')
-orgDB <- org.Hs.eg.db
-
 
 # Get gene names
 res$Gene <- mapIds(orgDB, keys=row.names(res), column='SYMBOL', keytype='ENSEMBL', multiVals=my_concat)
@@ -82,7 +62,7 @@ res$Gene[idx] <- res$ID[idx]
 
 # Write Results
 outResults <- data.frame(GeneID=res$ID, Gene=res$Gene, baseMean=res$baseMean, stat=res$stat, log2FoldChange=res$log2FoldChange, pvalue=res$pvalue, padj=res$padj)
-name <- paste(outDir, '/', outPrefix, '_results.txt', sep="") 
+name <- paste(outDir, '/', outPrefix, '/results.txt', sep="") 
 write.table(outResults, file=name, sep="\t", quote=F, row.names=F)
 
 # Significant genes

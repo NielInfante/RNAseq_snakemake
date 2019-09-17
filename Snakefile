@@ -84,7 +84,7 @@ rule create_cofig_for_deseq:
         file.write("contrast <- {}\n\n".format(config['experiments'][exp]['contrast']))
 
         file.write("meta <- meta %>% filter({})\n".format(config['experiments'][exp]['filter']))
-        file.write("tx2Gene_file <- {}\n".format(config['tx2gene']))
+        file.write("tx2gene <- read_tsv({})\n".format(config['tx2gene']))
         file.write("samples <- meta${}\n".format(config['sample_column']))
         file.write("meta$Display <- meta${}\n".format(config['experiments'][exp]['display_column']))
 
