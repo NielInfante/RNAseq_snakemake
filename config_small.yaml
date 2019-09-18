@@ -14,10 +14,10 @@ salmon_bootstraps: 3
 metadata_file: meta.txt
 tx2gene: Data/IDs
 sample_column: Sample
+organism: org.Hs.eg.db
 experiments:
   120d:
     prefix: 120d
-    organism: org.Hs.eg.db
     filter: Time == '120d' | Time == '0'
     PCA_Group: Time
     design: Time
@@ -25,7 +25,6 @@ experiments:
     display_column: Sample
   Early_v_Late:
     prefix: Early_v_Late
-    organism: org.Hs.eg.db
     filter: Group == 'Early' | Group == 'Late'
     PCA_Group: Group
     design: Group

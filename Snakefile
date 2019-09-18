@@ -22,7 +22,7 @@ rule all:
         "my_report.html",
         expand("salmon/{sample}", sample=config["samples"]),
         expand("deseq/{experiment}/config.R", experiment=config["experiments"]),
-#        expand("deseq/{experiment}/dds.rds", experiment=config["experiments"])
+        expand("deseq/{experiment}/dds.rds", experiment=config["experiments"])
 
 
 rule fastqc:
@@ -64,8 +64,21 @@ rule salmon_quantification:
         "salmon quant -i {input.ref} --libType A --gcBias --numBootstraps {params.bootstraps} -p {threads} -1 {input.forward} -2 {input.reverse} -o {output.out} --validateMappings"
 
 
+# Rule to install packages.
+# This shold only have to run once.
+rule init_R:
+    output:
+        "envs/R_initialized"
+    conda:
+        "envs/forRMD.yaml"
+    shell:
+        "Rscript scripts/init.R {config[organism]}"
+
+
 # This rule will create an R config file to be used by doDESeq.R
 rule create_cofig_for_deseq:
+    input:
+        "envs/R_initialized"
     output:
 #        temp("deseq/{experiment}/config.R")
         file="deseq/{experiment}/config.R"
@@ -75,8 +88,8 @@ rule create_cofig_for_deseq:
 
         file = open(output[0],'w')
 
-        file.write("library('{}')\n".format(config['experiments'][exp]['organism']))
-        file.write("orgDB <- {})\n\n".format(config['experiments'][exp]['organism']))
+        file.write("library('{}')\n".format(config['organism']))
+        file.write("orgDB <- {})\n\n".format(config['organism']))
 
         file.write("outPrefix <- '{}'\n".format(config['experiments'][exp]['prefix']) )
         file.write("PCA_Group <- '{}'\n".format(config['experiments'][exp]['PCA_Group']))
@@ -98,12 +111,14 @@ rule create_cofig_for_deseq:
 
 rule do_deseq:
     input:
-        lambda wildcards: f"deseq/{[wildcards.experiment]}/config.R"
+        lambda wildcards: f"deseq/{wildcards.experiment}/config.R"
     output:
         "deseq/{experiment}/dds.rds",
         "deseq/{experiment}/results.txt"
     params:
         exp = lambda wildcards: f"{wildcards.experiment}"
+    conda:
+        "envs/forRMD.yaml"
     shell:
         "Rscript scripts/doDESeq.R {params.exp} {config[metadata_file]} {config[tx2gene]}"
 
@@ -113,4 +128,4 @@ rule report:
     output:
         "my_report.html"
     shell:
-        "touch report.html"
+        "touch my_report.html"
