@@ -1,0 +1,7 @@
+name: forRMD
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - texlive-core = 20180414
+  - pandoc = 2.7.3
