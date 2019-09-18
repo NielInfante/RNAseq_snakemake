@@ -19,7 +19,7 @@ rule all:
     input:
         expand("FastQC/{sample}_{num}_fastqc.zip", sample=config["samples"], num=['1', '2']),
 
-        "report.html",
+        "my_report.html",
         expand("salmon/{sample}", sample=config["samples"]),
         expand("deseq/{experiment}/config.R", experiment=config["experiments"]),
 #        expand("deseq/{experiment}/dds.rds", experiment=config["experiments"])
@@ -86,7 +86,7 @@ rule create_cofig_for_deseq:
         file.write("meta <- meta %>% filter({})\n".format(config['experiments'][exp]['filter']))
         file.write("tx2gene <- read_tsv({})\n".format(config['tx2gene']))
         file.write("samples <- meta${}\n".format(config['sample_column']))
-        file.write("meta$Display <- meta${}\n".format(config['experiments'][exp]['display_column']))
+        file.write("meta$Graph_Display <- meta${}\n".format(config['experiments'][exp]['display_column']))
 
 #        file.write("{}\n".format(config['experiments'][exp]['']))
 #        file.write("{}\n".format(config['experiments'][exp]['']))
@@ -111,6 +111,6 @@ rule do_deseq:
 
 rule report:
     output:
-        "report.html"
+        "my_report.html"
     shell:
         "touch report.html"
