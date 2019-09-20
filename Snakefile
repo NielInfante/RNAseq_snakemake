@@ -20,8 +20,8 @@ rule all:
         expand("FastQC/{sample}_{num}_fastqc.zip", sample=config["samples"], num=['1', '2']),
 
         "my_report.html",
-        expand("salmon/{sample}", sample=config["samples"]),
-        expand("deseq/{experiment}/config.R", experiment=config["experiments"]),
+#        expand("salmon/{sample}", sample=config["samples"]),
+#        expand("deseq/{experiment}/config.R", experiment=config["experiments"]),
         expand("deseq/{experiment}/dds.rds", experiment=config["experiments"])
 
 
@@ -111,7 +111,8 @@ rule create_cofig_for_deseq:
 
 rule do_deseq:
     input:
-        lambda wildcards: f"deseq/{wildcards.experiment}/config.R"
+        lambda wildcards: f"deseq/{wildcards.experiment}/config.R",
+        expand("salmon/{sample}", sample=config["samples"])
     output:
         "deseq/{experiment}/dds.rds",
         "deseq/{experiment}/results.txt"
