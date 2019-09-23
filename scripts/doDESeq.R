@@ -1,3 +1,8 @@
+# Error logging
+log <- file(snakemake@log[[1]], open="wt")
+sink(log)
+sink(log, type="message")
+
 library(tidyverse)
 library(tximport)
 #library(rjson)
@@ -7,17 +12,32 @@ library("RColorBrewer")
 library(ggrepel)
 library(gplots)
 
+organism <- snakemake@config$organism
+library(organism)
 
 # Assume this script will be invoked with the arguments (in order):
 # prefix  
 # metadata_file
-# tx2gene
 
-args <- commandArgs()
 
-meta <- read_tsv(args[2])
+# I'm not currently using this, but I don't want to loose the technique
+#iris %>% filter(Sepal.Length > 5.3 & Species == 'setosa')
 
-source(paste0('deseq/', args[1], '/config.R'))
+#x <- "Sepal.Length > 5.3 & Species == 'setosa'"
+#fc <- rlang::parse_expr(x)
+#iris %>% filter(!!fc)
+
+
+#args <- commandArgs()
+
+#meta <- read_tsv(args[2])
+
+meta_file_name <- snakemake@config$metadata_file
+meta <- read_tsv(meta_file_name)
+
+exp <- snakemake@params$exp
+
+snakemake@source(paste0('deseq/', exp, '/config.R'))
 
 
 outDir <- "deseq"

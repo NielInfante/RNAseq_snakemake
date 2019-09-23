@@ -71,8 +71,14 @@ rule init_R:
         "envs/R_initialized"
     conda:
         "envs/forRMD.yaml"
-    shell:
-        "Rscript scripts/init.R {config[organism]}"
+    log:
+        "logs/R_init.log"
+    params:
+        test = "My param"
+#    shell:
+#        "Rscript scripts/init.R {config[organism]}"
+    script:
+        "scripts/init.R"
 
 
 # This rule will create an R config file to be used by doDESeq.R
@@ -118,11 +124,14 @@ rule do_deseq:
         "deseq/{experiment}/results.txt"
     params:
         exp = lambda wildcards: f"{wildcards.experiment}"
+    log:
+        "logs/R_deseq_{experiment}.log"
     conda:
         "envs/forRMD.yaml"
-    shell:
-        "Rscript scripts/doDESeq.R {params.exp} {config[metadata_file]} {config[tx2gene]}"
-
+#    shell:
+#        "Rscript scripts/doDESeq.R {params.exp} {config[metadata_file]} {config[tx2gene]}"
+    script:
+        "scripts/doDESeq.R"
 
 
 rule report:
