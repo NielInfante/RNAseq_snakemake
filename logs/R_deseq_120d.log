@@ -1,0 +1,8 @@
+Error: package or namespace load failed for ‘tidyverse’ in dyn.load(file, DLLpath = DLLpath, ...):
+ unable to load shared object '/Users/niel/projects/RNAseq_snakemake/.snakemake/conda/9801d1cb/lib/R/library/stringi/libs/stringi.dylib':
+  dlopen(/Users/niel/projects/RNAseq_snakemake/.snakemake/conda/9801d1cb/lib/R/library/stringi/libs/stringi.dylib, 6): Library not loaded: @rpath/libicui18n.64.dylib
+  Referenced from: /Users/niel/projects/RNAseq_snakemake/.snakemake/conda/9801d1cb/lib/R/library/stringi/libs/stringi.dylib
+  Reason: image not found
+In addition: Warning message:
+package ‘tidyverse’ was built under R version 3.6.1 
+Execution halted

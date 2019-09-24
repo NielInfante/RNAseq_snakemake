@@ -12,6 +12,10 @@ library("RColorBrewer")
 library(ggrepel)
 library(gplots)
 
+
+#DelayedArray
+
+
 organism <- snakemake@config$organism
 library(organism)
 

@@ -70,7 +70,8 @@ rule init_R:
     output:
         "envs/R_initialized"
     conda:
-        "envs/forRMD.yaml"
+#        "envs/forRMD.yaml"
+        "envs/minimal_R.yaml"
     log:
         "logs/R_init.log"
     params:
@@ -127,7 +128,8 @@ rule do_deseq:
     log:
         "logs/R_deseq_{experiment}.log"
     conda:
-        "envs/forRMD.yaml"
+#        "envs/forRMD.yaml"
+        "envs/minimal_R.yaml"
 #    shell:
 #        "Rscript scripts/doDESeq.R {params.exp} {config[metadata_file]} {config[tx2gene]}"
     script:

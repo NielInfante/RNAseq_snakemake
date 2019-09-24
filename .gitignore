@@ -6,3 +6,4 @@ salmon/
 deseq/
 .snakemake/
 report.html
+logs/.
