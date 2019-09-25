@@ -4,11 +4,11 @@ use strict;
 # script to parse biotype and IDs info from fa files
 
 open (inFile, $ARGV[0]) || die "Can't open in $!\n";
-open (oFile_ID, ">"$ARGV[0]"") || die "Can't open IDs $!\n";
-open (oFile_Bio, ">"$ARGV[0]"") || die "Can't open biotypes $!\n";
+open (oFile_ID, ">$ARGV[1]") || die "Can't open IDs $!\n";
+open (oFile_Bio, ">$ARGV[2]") || die "Can't open biotypes $!\n";
 
-print oFile_ID "Transcript_ID\tGene_ID\n"
-print oFile_Bio "Transcript_I\tBiotype\tGene_ID\n"
+print oFile_ID "TransID\tGeneID\n";
+print oFile_Bio "TransID\tBiotype\tGeneName\n";
 
 
 

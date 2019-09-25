@@ -6,6 +6,6 @@ salmon/
 deseq/
 .snakemake/
 report.html
-logs/.
+logs/*
 .DS_Store
 ._*

@@ -7,46 +7,46 @@ library(tidyverse)
 library(tximport)
 #library(rjson)
 library(DESeq2)
-library('AnnotationDbi')
 library("RColorBrewer")
 library(ggrepel)
 library(gplots)
 
 
-#DelayedArray
+
+#outPrefix <- '120d'
+#PCA_Group <- 'Time'
+#design =~ Time
+#contrast <- c('Time', '120d', '0')
+
+#meta <- meta %>% filter(Time == '120d' | Time == '0')
+#samples <- meta$Sample
+#meta$Graph_Display <- meta$Sample
 
 
-organism <- snakemake@config$organism
-library(organism)
-
-# Assume this script will be invoked with the arguments (in order):
-# prefix  
-# metadata_file
 
 
-# I'm not currently using this, but I don't want to loose the technique
-#iris %>% filter(Sepal.Length > 5.3 & Species == 'setosa')
-
-#x <- "Sepal.Length > 5.3 & Species == 'setosa'"
-#fc <- rlang::parse_expr(x)
-#iris %>% filter(!!fc)
-
-
-#args <- commandArgs()
-
-#meta <- read_tsv(args[2])
-
+print("Loaded packages")
 meta_file_name <- snakemake@config$metadata_file
 meta <- read_tsv(meta_file_name)
 
+tx2gene <- read_tsv(snakemake@input[['id']])
+
+
+# This gets the prefix we need
 exp <- snakemake@params$exp
 
-snakemake@source(paste0('deseq/', exp, '/config.R'))
+# This sources the config file the previous rule created
+snakemake@source(paste0('../deseq/', exp, '/config.R'))
 
 
+# script runs in .snakemake/scripts
 outDir <- "deseq"
 
 files <- paste0('salmon/', samples, '/quant.sf')
+
+getwd()
+print("Files are:")
+print(files)
 
 txi <- tximport(files, type='salmon', tx2gene = tx2gene)
 
@@ -62,41 +62,39 @@ dds <- DESeq(dds)
 res<-results(dds, contrast=contrast)
 res<-res[order(res$padj),]
 res <- as.data.frame(res)
+res$GeneID <- row.names(res)
 
 # Save dds
 saveRDS(dds, paste0(outDir, '/', outPrefix, '/dds.rds'))
 
 
-my_concat <- function(x){paste(x, sep="|", collapse="|")}
+biotype <- read_tsv('Data/Biotype')
+biotype <- left_join(biotype, tx2gene)
 
-# Get gene names
-res$Gene <- mapIds(orgDB, keys=row.names(res), column='SYMBOL', keytype='ENSEMBL', multiVals=my_concat)
-res$ID <- row.names(res)
+# Only need one transcript per gene
+biotype <- biotype[!duplicated(biotype$GeneID),]
 
-# Use Gene ID in place where there is no gene name
-idx <- is.na(res$Gene)
-res$Gene[idx] <- res$ID[idx]
-idx <- which(res$Gene == 'NA')  # mapIDs with my_concat can return "NA", not NA
-res$Gene[idx] <- res$ID[idx]
-
+res <- left_join(res, biotype)
 
 # Write Results
-outResults <- data.frame(GeneID=res$ID, Gene=res$Gene, baseMean=res$baseMean, stat=res$stat, log2FoldChange=res$log2FoldChange, pvalue=res$pvalue, padj=res$padj)
+outResults <- data.frame(GeneID=res$GeneID, Gene=res$GeneName, baseMean=res$baseMean, stat=res$stat, log2FoldChange=res$log2FoldChange, pvalue=res$pvalue, padj=res$padj)
 name <- paste(outDir, '/', outPrefix, '/results.txt', sep="") 
 write.table(outResults, file=name, sep="\t", quote=F, row.names=F)
 
 # Significant genes
 r2 <- res[!(is.na(res$padj)),]
 resSig <- r2[ r2$padj < 0.05, ]
-resTable <- data.frame(GeneID=row.names(resSig), Gene=resSig$Gene, baseMean=resSig$baseMean, stat=resSig$stat, log2FoldChange=resSig$log2FoldChange, pvalue=resSig$pvalue, padj=resSig$padj)
-write.table(resTable,file=paste(outDir, "/", outPrefix, "_significant.txt", sep=""), sep="\t", quote=F, row.names=F)
+resTable <- data.frame(GeneID=resSig$GeneID, Gene=resSig$GeneName, baseMean=resSig$baseMean, stat=resSig$stat, log2FoldChange=resSig$log2FoldChange, pvalue=resSig$pvalue, padj=resSig$padj)
+write.table(resTable,file=paste(outDir, "/", outPrefix, "/significant.txt", sep=""), sep="\t", quote=F, row.names=F)
 
 
 
 ##########  Sanity Check
 # Plot counts of most significant, to check if fold change is right
 png(paste0(outDir, '/',outPrefix,'/sanity.check.png'))
-plotCounts(dds, gene=res[1,]$ID, intgroup = PCA_Group, main=res[1,]$Gene, pch=19)
+title=paste(res[1,]$GeneName, "\nFold Change:",res[1,]$log2FoldChange)
+plotCounts(dds, gene=res[1,]$GeneID, intgroup = PCA_Group, main=res[1,]$GeneName, 
+					 sub=paste('FC:', format(res[1,]$log2FoldChange, digits=2)), pch=19)
 dev.off()
 
 

@@ -12,9 +12,7 @@ salmon_bootstraps: 3
 
 # Differential Analysis
 metadata_file: meta.txt
-tx2gene: Data/IDs
 sample_column: Sample
-organism: org.Hs.eg.db
 experiments:
   120d:
     prefix: 120d
@@ -23,10 +21,10 @@ experiments:
     design: Time
     contrast: c('Time', '120d', '0')
     display_column: Sample
-  Early_v_Late:
-    prefix: Early_v_Late
-    filter: Group == 'Early' | Group == 'Late'
-    PCA_Group: Group
-    design: Group
-    contrast: c('Group', 'Early', 'Late')
-    display_column: Sample
+#  Early_v_Late:
+#    prefix: Early_v_Late
+#    filter: Group == 'Early' | Group == 'Late'
+#    PCA_Group: Group
+#    design: Group
+#    contrast: c('Group', 'Early', 'Late')
+#    display_column: Sample

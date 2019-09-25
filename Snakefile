@@ -105,16 +105,12 @@ rule create_cofig_for_deseq:
 
         file = open(output[0],'w')
 
-        file.write("library('{}')\n".format(config['organism']))
-        file.write("orgDB <- {})\n\n".format(config['organism']))
-
         file.write("outPrefix <- '{}'\n".format(config['experiments'][exp]['prefix']) )
         file.write("PCA_Group <- '{}'\n".format(config['experiments'][exp]['PCA_Group']))
         file.write("design =~ {}\n".format(config['experiments'][exp]['design']))
         file.write("contrast <- {}\n\n".format(config['experiments'][exp]['contrast']))
 
         file.write("meta <- meta %>% filter({})\n".format(config['experiments'][exp]['filter']))
-        file.write("tx2gene <- read_tsv({})\n".format(config['tx2gene']))
         file.write("samples <- meta${}\n".format(config['sample_column']))
         file.write("meta$Graph_Display <- meta${}\n".format(config['experiments'][exp]['display_column']))
 
@@ -130,7 +126,7 @@ rule do_deseq:
     input:
         lambda wildcards: f"deseq/{wildcards.experiment}/config.R",
         expand("salmon/{sample}", sample=config["samples"]),
-        "Data/IDs"
+        id="Data/IDs"
     output:
         "deseq/{experiment}/dds.rds",
         "deseq/{experiment}/results.txt"
