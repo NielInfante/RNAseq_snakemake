@@ -15,6 +15,7 @@ READ_FOLDER = config['reads_folder']
 READ_SUFFIX = config['input_file_suffix']
 
 
+
 rule all:
     input:
         expand("FastQC/{sample}_{num}_fastqc.zip", sample=config["samples"], num=['1', '2']),
@@ -63,6 +64,15 @@ rule salmon_quantification:
     shell:
         "salmon quant -i {input.ref} --libType A --gcBias --numBootstraps {params.bootstraps} -p {threads} -1 {input.forward} -2 {input.reverse} -o {output.out} --validateMappings"
 
+# Parses transcript file and writes two output files with data in format for R to use
+rule parseTranscripts:
+    input:
+        ref=f"{config['reference_base']}.fa"
+    output:
+        ID="Data/IDs",
+        bio="Data/Biotype"
+    shell:
+        "perl scripts/parseFasta.pl {input.ref} {output.ID} {output.bio}"
 
 # Rule to install packages.
 # This shold only have to run once.
@@ -119,7 +129,8 @@ rule create_cofig_for_deseq:
 rule do_deseq:
     input:
         lambda wildcards: f"deseq/{wildcards.experiment}/config.R",
-        expand("salmon/{sample}", sample=config["samples"])
+        expand("salmon/{sample}", sample=config["samples"]),
+        "Data/IDs"
     output:
         "deseq/{experiment}/dds.rds",
         "deseq/{experiment}/results.txt"

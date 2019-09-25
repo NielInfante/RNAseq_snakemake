@@ -7,3 +7,5 @@ deseq/
 .snakemake/
 report.html
 logs/.
+.DS_Store
+._*
