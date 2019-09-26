@@ -21,6 +21,13 @@ experiments:
     design: Time
     contrast: c('Time', '120d', '0')
     display_column: Sample
+  220d:
+    prefix: 220d
+    filter: Time == '120d' | Time == '0'
+    PCA_Group: Time
+    design: Time
+    contrast: c('Time', '120d', '0')
+    display_column: Sample
 #  Early_v_Late:
 #    prefix: Early_v_Late
 #    filter: Group == 'Early' | Group == 'Late'

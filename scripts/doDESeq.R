@@ -7,9 +7,6 @@ library(tidyverse)
 library(tximport)
 #library(rjson)
 library(DESeq2)
-library("RColorBrewer")
-library(ggrepel)
-library(gplots)
 
 
 

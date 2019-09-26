@@ -1,0 +1,193 @@
+---
+title: "RNA seq Report"
+author: "Niel Infante"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: slidy_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+
+# Error logging
+log <- file(snakemake@log[[1]], open="wt")
+sink(log)
+sink(log, type="message")
+
+# Load needed packages
+library(tidyverse)
+library(DESeq2)
+library("RColorBrewer")
+library(ggrepel)
+library(gplots)
+library(pheatmap)
+library(knitr)
+
+# Read dds
+exp <- snakemake@params$exp
+dds <- readRDS(paste0("deseq/", exp, "/dds.rds"))
+
+vsd <- vst(dds, blind=F)
+#vsd <- varianceStabilizingTransformation(dds, blind=F)
+
+
+# Read Metadata and source config
+meta_file_name <- snakemake@config$metadata_file
+meta <- read_tsv(meta_file_name)
+
+snakemake@source(paste0('../deseq/', exp, '/config.R'))
+
+# Read results
+
+res <- read_tsv(paste0('deseq/', exp, '/results.txt'))
+```
+
+## Results
+
+These are the top 10 most significant genes
+```{r results}
+
+kable(res[1:10,])
+
+```
+
+The full list is available in the file results.txt
+
+## Fold Change
+
+```{r sanity}
+
+title=paste(res[1,]$GeneName, "\nFold Change:",res[1,]$log2FoldChange)
+plotCounts(dds, gene=res[1,]$GeneID, intgroup = PCA_Group, main=res[1,]$Gene, 
+					 sub=paste('FC:', format(res[1,]$log2FoldChange, digits=2)), pch=19)
+
+
+```
+
+Fold change is reported as log2 (Fold Change). This graph give you an idea of what a positive versus negative fold change means.
+
+
+## MA Plot
+
+```{r maplot}
+plotMA(dds)
+```
+
+## Sample Distance
+
+```{r sample_heat}
+
+select <- order(rowMeans(counts(dds,normalized=TRUE)),decreasing=TRUE)[1:100]
+hmcol <- colorRampPalette(brewer.pal(9, "GnBu"))(100)
+
+distsRL <- dist(t(assay(vsd)))
+mat <- as.matrix(distsRL)
+rownames(mat) <- colnames(mat) <- with(colData(dds), paste(Graph_Display))
+
+heatmap.2(mat, trace="none", col = rev(hmcol), margin=c(8, 8), density.info = 'none')
+
+```
+
+This is a heatmap of sample distances. Dark indicates the samples are closer together, based on the expression of the 100 most expressed genes.
+
+
+## Cluster
+
+```{r cluster}
+plot(hclust(dist(t(assay(vsd)))), label=with(colData(dds), paste(Graph_Display)), main='Dendrogram', xlab='', sub='')
+
+```
+
+
+## PCA
+```{r pca}
+
+
+print(plotPCA(vsd, intgroup=c(PCA_Group)))
+```
+
+A Principle Conmponent plot of the data. Each point is a sample.
+
+
+## PCA with Names
+```{r pca_names}
+
+p <- plotPCA(vsd, intgroup=c(PCA_Group))
+p <- p + geom_text_repel(aes(x=PC1, y=PC2, 
+				label=with(colData(dds), paste(Graph_Display))), 
+				point.padding = unit(2,"points"))
+print(p)
+
+```
+
+The same PCA plot, with added names
+
+
+
+##  Volcano
+
+```{r volcano}
+
+par(pch = 16)
+with(res, plot(log2FoldChange, -log10(pvalue), main = "Volcano plot"))
+with(subset(res, padj < 0.05), points(log2FoldChange, -log10(pvalue), col = "red"))
+with(subset(res, abs(log2FoldChange) > 2), points(log2FoldChange, -log10(pvalue),  col = "orange"))
+
+with(subset(res, padj < 0.05 & abs(log2FoldChange) > 2), points(log2FoldChange,  -log10(pvalue), col = "green"))
+
+# Add legend
+legend("topleft", legend = c("FDR<0.05", "|LFC|>2", "both"), pch = 16, col = c("red", "orange", "green"))
+
+```
+
+
+## Expression Heatmap
+
+```{r pheatmap, message=F, warning=F}
+
+rld <- rlogTransformation(dds)
+
+
+# Get 15 up, 15 down 
+
+up <- head(order(res$log2FoldChange),15)
+up <- res[up,'GeneID']
+
+
+dn <- head(order(res$log2FoldChange, decreasing = T),15)
+dn <- res[dn,'GeneID']
+
+#get <- c(up,dn)
+get <- c(unlist(up),unlist(dn))
+
+
+rld15 <- rld[get]
+#rld15 <- rld[rld@rowRanges@partitioning@NAMES %in% get, ]
+
+rn <- data.frame(GeneID=rownames(rld15))
+rn <- left_join(rn, res)
+
+rownames(rld15) <- rn$GeneName
+
+mat <- assay(rld15)
+mat <- mat - rowMeans(mat)     # Get difference from mean for each gene
+df <- as.data.frame(colData(rld15)[,PCA_Group])
+names(df) <- PCA_Group
+
+# Need the same names in both the df and the matrix
+rownames(df) <- colData(rld15)[,c('Graph_Display')]
+colnames(mat) <- colData(rld15)[,c('Graph_Display')]
+
+
+pheatmap(mat, cutree_rows = 2, cutree_cols = 2, annotation_col = df)
+
+```
+
+Heatmap shows the 15 most upregulated, and 15 most downregulated genes. Color indicates how much the expression of the gene inthe samples is different from the mean expression of that gene.
+
+
+
+
+
+
+

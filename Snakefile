@@ -23,7 +23,7 @@ rule all:
         "my_report.html",
 #        expand("salmon/{sample}", sample=config["samples"]),
 #        expand("deseq/{experiment}/config.R", experiment=config["experiments"]),
-        expand("deseq/{experiment}/dds.rds", experiment=config["experiments"])
+        expand("deseq/{experiment}/report.html", experiment=config["experiments"])
 
 
 rule fastqc:
@@ -142,6 +142,17 @@ rule do_deseq:
     script:
         "scripts/doDESeq.R"
 
+rule deseq_report:
+    input:
+        lambda wildcards: f"deseq/{wildcards.experiment}/dds.rds"
+    output:
+        "deseq/{experiment}/report.html"
+    params:
+        exp = lambda wildcards: f"{wildcards.experiment}"
+    log:
+        "logs/R_report_{experiment}.log"
+    script:
+        "scripts/create_reports.Rmd"
 
 rule report:
     output:
