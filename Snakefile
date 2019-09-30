@@ -49,20 +49,25 @@ rule salmon_build_index:
         "salmon index -t {input.ref} -i {output} --type quasi -k 31"
 
 
-rule salmon_quantification:
+rule salmon_quant_reads:
     input:
-        forward=lambda wildcards: f"{READ_FOLDER}/{config['samples'][wildcards.sample]}_1{READ_SUFFIX}",
-        reverse=lambda wildcards: f"{READ_FOLDER}/{config['samples'][wildcards.sample]}_2{READ_SUFFIX}",
-        ref=f"{config['reference_base']}"
-#        confirm_ref=f"{config['reference_base']}/hash.bin"
+        r1 = lambda wildcards: f"{READ_FOLDER}/{config['samples'][wildcards.sample]}_R1{READ_SUFFIX}",
+        r2 =lambda wildcards: f"{READ_FOLDER}/{config['samples'][wildcards.sample]}_R2{READ_SUFFIX}",
+        index = f"{config['reference_base']}"
     output:
-        out=directory("salmon/{sample}")
-
+        quant = 'salmon/{sample}/quant.sf',
+        lib = 'salmon/{sample}/lib_format_counts.json'
+    log:
+        'logs/salmon3/{sample}.log'
     params:
-        bootstraps = {config['salmon_bootstraps']}
+        # optional parameters
+        libtype ="A",
+        #zip_ext = bz2 # req'd for bz2 files ('bz2'); optional for gz files('gz')
+        extra=f"--gcBias --validateMappings --numBootstraps {config['salmon_bootstraps']}"
     threads: 16
-    shell:
-        "salmon quant -i {input.ref} --libType A --gcBias --numBootstraps {params.bootstraps} -p {threads} -1 {input.forward} -2 {input.reverse} -o {output.out} --validateMappings"
+    wrapper:
+        "0.38.0/bio/salmon/quant"
+
 
 # Parses transcript file and writes two output files with data in format for R to use
 rule parseTranscripts:
@@ -125,7 +130,7 @@ rule create_cofig_for_deseq:
 rule do_deseq:
     input:
         lambda wildcards: f"deseq/{wildcards.experiment}/config.R",
-        expand("salmon/{sample}", sample=config["samples"]),
+        expand("salmon/{sample}/quant.sf", sample=config["samples"]),
         id="Data/IDs"
     output:
         "deseq/{experiment}/dds.rds",
