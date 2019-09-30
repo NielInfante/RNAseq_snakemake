@@ -21,7 +21,7 @@ rule all:
         expand("FastQC/{sample}_{num}_fastqc.zip", sample=config["samples"], num=['1', '2']),
 
         "my_report.html",
-#        expand("salmon/{sample}", sample=config["samples"]),
+        expand("salmon/{sample}", sample=config["samples"]),
 #        expand("deseq/{experiment}/config.R", experiment=config["experiments"]),
         expand("deseq/{experiment}/report.html", experiment=config["experiments"])
 
@@ -41,15 +41,13 @@ rule fastqc:
 rule salmon_build_index:
     input:
         ref=f"{config['reference_base']}.fa"
-#    params:
-#        outdir=f"{config['reference_base']}"
     output:
         directory(f"{config['reference_base']}")
     shell:
         "salmon index -t {input.ref} -i {output} --type quasi -k 31"
 
 
-rule salmon_quant_reads:
+rule salmon_quantification:
     input:
         r1 = lambda wildcards: f"{READ_FOLDER}/{config['samples'][wildcards.sample]}_R1{READ_SUFFIX}",
         r2 =lambda wildcards: f"{READ_FOLDER}/{config['samples'][wildcards.sample]}_R2{READ_SUFFIX}",
@@ -98,7 +96,7 @@ rule init_R:
 
 
 # This rule will create an R config file to be used by doDESeq.R
-rule create_cofig_for_deseq:
+rule create_config_for_deseq:
     input:
         "envs/R_initialized"
     output:
@@ -118,11 +116,6 @@ rule create_cofig_for_deseq:
         file.write("meta <- meta %>% filter({})\n".format(config['experiments'][exp]['filter']))
         file.write("samples <- meta${}\n".format(config['sample_column']))
         file.write("meta$Graph_Display <- meta${}\n".format(config['experiments'][exp]['display_column']))
-
-#        file.write("{}\n".format(config['experiments'][exp]['']))
-#        file.write("{}\n".format(config['experiments'][exp]['']))
-#        file.write("{}\n".format(config['experiments'][exp]['']))
-#        file.write("{}\n".format(config['experiments'][exp]['']))
 
         file.close()
 
