@@ -9,4 +9,4 @@ report.html
 logs/*
 .DS_Store
 ._*
-envs/snake_no_conda
+envs/snake_no_conda.yaml
