@@ -33,7 +33,7 @@ READ_FOLDER = config['reads_folder']
 rule all:
     input:
         expand("QC/FastQC/{sample_file}_fastqc.zip", sample_file=fastqFiles.values()),       #FastQC output
-#        expand("salmon/{sample}/quant.sf", sample=config["samples"]),               # salmon quantification
+        expand("salmon/{sample}/quant.sf", sample=config["samples"]),               # salmon quantification
         expand("deseq/{experiment}/report.html", experiment=config["experiments"]),  # DESeq reports
         "QC/report.html"
 
@@ -150,7 +150,7 @@ rule create_config_for_deseq:
 rule do_deseq:
     input:
         lambda wildcards: f"deseq/{wildcards.experiment}/config.R",
-        expand("salmon/{sample}/quant.sf", sample=config["samples"]),
+        expand("salmon/{sample}/quant.sf", sample=config['samples']),
         id="Data/IDs"
     output:
         "deseq/{experiment}/dds.rds",
