@@ -16,6 +16,24 @@ You will need to create a metadata file for the samples.
 
 You will need to create a configuration file.
 
+For the list of samples, the format is:
+samples:
+    sample name:
+        F: Forward reads file
+        R: reverse reads file
+
+If you have a lot of files, you may find the following shell command helpful:
+
+```{sh}
+# Assuming files look like {sample_name}_R1.fastq.gz
+
+ for f in *R1*; do nm=${f%_R*}; echo "  ${nm}:"; echo "    F: $f"; echo "    R: ${f/R1/R2}"; done
+
+```
+
+Note the spacing is important to get the indent levels correct. Also note that you should avoid using an integer as the sample name, this will likely cause issues.
+
+
 Use the files meta.txt and config.yaml as guides.
 
 Reference transcriptome should be put in a folder called Data, and its name referenced in the config file. Note the file should have a suffix of .fa, which is not included in the config file.
