@@ -18,3 +18,4 @@ dependencies:
   - r-gplots = 3.0.1.1
   - r-pheatmap = 1.0.12
   - r-knitr = 1.25
+  - multiqc = 1.7
