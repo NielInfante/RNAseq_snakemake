@@ -1,7 +1,7 @@
 # Ignore data directories
 Data/
 reads/
-FastQC/
+QC/
 salmon/
 deseq/
 .snakemake/

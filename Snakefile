@@ -6,36 +6,63 @@ Date: 10 September 2019
 
 
 # read config info into this namespace
-configfile: "config_small.yaml"
-#configfile: "config.yaml"
-#print (config['samples'])
+configfile: "config.yaml"
 
+# Create file list
+files = list()
+fastqFiles = {}
+for s in config['samples']:
+    file = config['samples'][s]['F']
+
+    fileName = re.sub(config['input_file_suffix'], "", file)
+    files.append(file)
+    fastqFiles[file] = fileName
+
+    file = config['samples'][s]['R']
+    fileName = re.sub(config['input_file_suffix'], "", file)
+    files.append(file)
+    fastqFiles[file] = fileName
+
+
+
+#print(fastqFiles)
 
 READ_FOLDER = config['reads_folder']
-READ_SUFFIX = config['input_file_suffix']
-
 
 
 rule all:
     input:
-        expand("FastQC/{sample}_{num}_fastqc.zip", sample=config["samples"], num=['1', '2']),
+        expand("QC/FastQC/{sample_file}_fastqc.zip", sample_file=fastqFiles.values()),       #FastQC output
+#        expand("salmon/{sample}/quant.sf", sample=config["samples"]),               # salmon quantification
+        expand("deseq/{experiment}/report.html", experiment=config["experiments"]),  # DESeq reports
+        "QC/report.html"
 
-        "my_report.html",
-        expand("salmon/{sample}", sample=config["samples"]),
-#        expand("deseq/{experiment}/config.R", experiment=config["experiments"]),
-        expand("deseq/{experiment}/report.html", experiment=config["experiments"])
 
 
 rule fastqc:
     input:
-        lambda wildcards: f"{READ_FOLDER}/{config['samples'][wildcards.sample]}_{wildcards.num}{READ_SUFFIX}"
+        lambda wildcards: f"{config['reads_folder']}/{wildcards.sample_file}{config['input_file_suffix']}"
+#        f"{config['reads_folder']}/{sample_file}{config['input_file_suffix']}"
+#        lambda wildcards: str(config['reads_folder'] / f"{wildcards.sample_file}")
+#        expand("QC/FastQC/{sample_file}_fastqc.zip", sample_file=fastqFiles.values())
     output:
-#        "FastQC/{sample}_{num,\d+}{suffix}_fastqc.zip"
-        "FastQC/{sample}_{num,\d+}_fastqc.zip"
+#        "QC/FastQC/{fastqFiles[sample_file]}_fastqc.zip"
+        "QC/FastQC/{sample_file}_fastqc.zip"
     threads: 16
     shell:
-        "fastqc -t {threads} {input} -o FastQC"
+        "fastqc -t {threads} {input} -o QC/FastQC"
+#        "cat {input} | fastqc -t {threads} stdin:{sample_file} -o QC/FastQC"
 
+
+rule multiQC:
+    input:
+#        expand("QC/FastQC/{sample_file}_fastqc.zip", sample_file=files),       #FastQC output
+        expand("QC/FastQC/{sample_file}_fastqc.zip", sample_file=fastqFiles.values()),       #FastQC output
+        expand("salmon/{sample}/quant.sf", sample=config["samples"])           # salmon quantification
+    output:
+        "QC/report.html"
+    shell:
+        "multiqc -n {output} QC/FastQC salmon"
 
 
 rule salmon_build_index:
@@ -49,8 +76,8 @@ rule salmon_build_index:
 
 rule salmon_quantification:
     input:
-        r1 = lambda wildcards: f"{READ_FOLDER}/{config['samples'][wildcards.sample]}_R1{READ_SUFFIX}",
-        r2 =lambda wildcards: f"{READ_FOLDER}/{config['samples'][wildcards.sample]}_R2{READ_SUFFIX}",
+        r1 = lambda wildcards: f"{config['reads_folder']}/{config['samples'][wildcards.sample]['F']}",
+        r2 = lambda wildcards: f"{config['reads_folder']}/{config['samples'][wildcards.sample]['R']}",
         index = f"{config['reference_base']}"
     output:
         quant = 'salmon/{sample}/quant.sf',
@@ -98,7 +125,7 @@ rule init_R:
 # This rule will create an R config file to be used by doDESeq.R
 rule create_config_for_deseq:
     input:
-        "envs/R_initialized"
+#        "envs/R_initialized"      # Only include if we really want to initialize
     output:
 #        temp("deseq/{experiment}/config.R")
         file="deseq/{experiment}/config.R"

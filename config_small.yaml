@@ -1,12 +1,25 @@
 samples:
-    Con_1:  Con_1
-    Con_2:  Con_2
-    Con_3:  Con_3
-    T_120d_1: T_120d_1
-    T_120d_2: T_120d_2
-    T_120d_3: T_120d_3
+    Con_1:
+      F: Con_1_1.fq.gz
+      R: Con_1_2.fq.gz
+    Con_2:
+      F: Con_2_1.fq.gz
+      R: Con_2_2.fq.gz
+    Con_3:
+      F: Con_3_1.fq.gz
+      R: Con_3_2.fq.gz
+    T_120d_1:
+      F: T_120d_1_1.fq.gz
+      R: T_120d_1_2.fq.gz
+    T_120d_2:
+      F: T_120d_2_1.fq.gz
+      R: T_120d_2_2.fq.gz
+    T_120d_3:
+      F: T_120d_3_1.fq.gz
+      R: T_120d_3_2.fq.gz
 reads_folder: reads
-input_file_suffix: .fq.gz
+
+
 reference_base: Data/hg38_rna
 salmon_bootstraps: 3
 

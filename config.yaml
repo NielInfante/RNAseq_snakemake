@@ -1,38 +1,50 @@
 samples:
-    Con_1:  Con_1
-    Con_2:  Con_2
-    Con_3:  Con_3
-    T_120d_1: T_120d_1
-    T_120d_2: T_120d_2
-    T_120d_3: T_120d_3
-    T_14d_1:  T_14d_1
-    T_14d_2:  T_14d_2
-    T_14d_3:  T_14d_3
-    T_30d_1:  T_30d_1
-    T_30d_2:  T_30d_2
-    T_30d_3:  T_30d_3
-    T_3d_1: T_3d_1
-    T_3d_2: T_3d_2
-    T_3d_3: T_3d_3
-    T_3h_1: T_3h_1
-    T_3h_2: T_3h_2
-    T_3h_3: T_3h_3
-    T_60d_1:  T_60d_1
-    T_60d_2:  T_60d_2
-    T_60d_3:  T_60d_3
-    T_6d_1: T_6d_1
-    T_6d_2: T_6d_2
-    T_6d_3: T_6d_3
-    T_8h_1: T_8h_1
-    T_8h_2: T_8h_2
-    T_8h_3: T_8h_3
-    T_9d_1: T_9d_1
-    T_9d_2: T_9d_2
-    T_9d_3: T_9d_3
-    T_wo_1: T_wo_1
-    T_wo_2: T_wo_2
-    T_wo_3: T_wo_3
-input_file_suffix: .fq.gz
+    Con_1:
+      F: Con_1_1.fq.gz
+      R: Con_1_2.fq.gz
+    Con_2:
+      F: Con_2_1.fq.gz
+      R: Con_2_2.fq.gz
+    Con_3:
+      F: Con_3_1.fq.gz
+      R: Con_3_2.fq.gz
+    T_120d_1:
+      F: T_120d_1_1.fq.gz
+      R: T_120d_1_2.fq.gz
+    T_120d_2:
+      F: T_120d_2_1.fq.gz
+      R: T_120d_2_2.fq.gz
+    T_120d_3:
+      F: T_120d_3_1.fq.gz
+      R: T_120d_3_2.fq.gz
 reads_folder: reads
+input_file_suffix: .fq.gz
+
 reference_base: Data/hg38_rna
 salmon_bootstraps: 3
+
+# Differential Analysis
+metadata_file: meta.txt
+sample_column: Sample
+experiments:
+  120d:
+    prefix: 120d
+    filter: Time == '120d' | Time == '0'
+    PCA_Group: Time
+    design: Time
+    contrast: c('Time', '120d', '0')
+    display_column: Sample
+  220d:
+    prefix: 220d
+    filter: Time == '120d' | Time == '0'
+    PCA_Group: Time
+    design: Time
+    contrast: c('Time', '120d', '0')
+    display_column: Sample
+#  Early_v_Late:
+#    prefix: Early_v_Late
+#    filter: Group == 'Early' | Group == 'Late'
+#    PCA_Group: Group
+#    design: Group
+#    contrast: c('Group', 'Early', 'Late')
+#    display_column: Sample

@@ -6,7 +6,7 @@ output: slidy_presentation
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, warning=F)
 
 
 # Error logging
@@ -28,6 +28,8 @@ exp <- snakemake@params$exp
 dds <- readRDS(paste0("deseq/", exp, "/dds.rds"))
 
 vsd <- vst(dds, blind=F)
+
+# For testing only
 #vsd <- varianceStabilizingTransformation(dds, blind=F)
 
 
