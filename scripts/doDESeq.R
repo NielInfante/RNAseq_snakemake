@@ -88,10 +88,35 @@ name <- paste(outDir, '/', outPrefix, '/results.txt', sep="")
 write.table(res, file=name, sep="\t", quote=F, row.names=F)
 
 # Significant genes
-r2 <- res[!(is.na(res$padj)),]
-resSig <- r2[ r2$padj < 0.05, ]
-resTable <- data.frame(GeneID=resSig$GeneID, Gene=resSig$GeneName, baseMean=resSig$baseMean, stat=resSig$stat, log2FoldChange=resSig$log2FoldChange, pvalue=resSig$pvalue, padj=resSig$padj)
-write.table(resTable,file=paste(outDir, "/", outPrefix, "/significant.txt", sep=""), sep="\t", quote=F, row.names=F)
+
+## Get an appropriate base mean cutoff value
+a <- hist(log2(res$baseMean))
+b <- a$counts
+maxAt <- which(b==max(b))
+
+cut_index <- -1
+for (i in (maxAt + 1):length(b)){
+	diff <- b[i] - b[i-1]
+	if (diff > 0){
+		cut_index <- i - 1
+		break
+	}
+}
+
+if (cut_index < 0){
+	cut_value <- median(log2(res$baseMean))
+} else {
+	cut_value <- a$breaks[cut_index]	
+}
+
+# write out cutoff so I can use it in report
+write.table(data.frame(CV=c(cut_value)), file=paste(outDir, "/", outPrefix, "/basemean_cutoff.txt", sep=""), sep="\t", quote=F, row.names=F)
+
+resSig <- res[!(is.na(res$padj)),] # Keep only genes that have a calculated adjusted p
+resSig <- resSig[ resSig$padj < 0.05, ] # Keep adjusted p less than 0.05
+resSig <- resSig[resSig$baseMean > (2^cut_value), ] # Keep genes with enough expression
+
+write.table(resSig,file=paste(outDir, "/", outPrefix, "/significant.txt", sep=""), sep="\t", quote=F, row.names=F)
 
 
 

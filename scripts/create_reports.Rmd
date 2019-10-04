@@ -40,8 +40,11 @@ meta <- read_tsv(meta_file_name)
 snakemake@source(paste0('../deseq/', exp, '/config.R'))
 
 # Read results
-
 res <- read_tsv(paste0('deseq/', exp, '/results.txt'))
+
+# Read CV
+cv <- read_tsv(paste0('deseq/', exp, '/basemean_cutoff.txt'))
+cut_value <- cv$CV[1]
 ```
 
 ## Results
@@ -67,6 +70,18 @@ plotCounts(dds, gene=res[1,]$GeneID, intgroup = PCA_Group, main=res[1,]$Gene,
 ```
 
 Fold change is reported as log2 (Fold Change). This graph give you an idea of what a positive versus negative fold change means.
+
+## Expression Cutoff
+
+```{r expr_cut}
+ggplot(res, aes(x=log2(baseMean))) + geom_density() + 
+	geom_vline(xintercept=cut_value, color='red') +
+	geom_text(aes(x=cut_value, y=.6, label='   Expression Cutoff', hjust='left'), color='red')
+
+
+```
+
+Genes are filtered if the average expression across all samples is less than the cut off value, in this case `r 2^cut_value`.
 
 
 ## MA Plot
