@@ -83,7 +83,7 @@ rule salmon_quantification:
         quant = 'salmon/{sample}/quant.sf',
         lib = 'salmon/{sample}/lib_format_counts.json'
     log:
-        'logs/salmon3/{sample}.log'
+        'logs/salmon/{sample}.log'
     params:
         # optional parameters
         libtype ="A",
@@ -143,7 +143,7 @@ rule create_config_for_deseq:
         file.write("meta <- meta %>% filter({})\n".format(config['experiments'][exp]['filter']))
         file.write("samples <- meta${}\n".format(config['sample_column']))
         file.write("meta$Graph_Display <- meta${}\n".format(config['experiments'][exp]['display_column']))
-        file.write("sample_column <- {}".format(config['sample_column']))
+        file.write("sample_column <- '{}'".format(config['sample_column']))
 
         file.close()
 

@@ -27,10 +27,10 @@ library(knitr)
 exp <- snakemake@params$exp
 dds <- readRDS(paste0("deseq/", exp, "/dds.rds"))
 
-vsd <- vst(dds, blind=F)
+#vsd <- vst(dds, blind=F)
 
 # For testing only
-#vsd <- varianceStabilizingTransformation(dds, blind=F)
+vsd <- varianceStabilizingTransformation(dds, blind=F)
 
 
 # Read Metadata and source config
@@ -63,8 +63,15 @@ The full list is available in the file results.txt
 ```{r sanity}
 
 title=paste(res[1,]$GeneName, "\nFold Change:",res[1,]$log2FoldChange)
-plotCounts(dds, gene=res[1,]$GeneID, intgroup = PCA_Group, main=res[1,]$Gene, 
+plotCounts(dds, gene=res[1,]$GeneID, intgroup = PCA_Group, main=res[1,]$GeneName, 
 					 sub=paste('FC:', format(res[1,]$log2FoldChange, digits=2)), pch=19)
+
+
+
+title=paste(res[1,]$GeneName, "\nFold Change:",res[1,]$log2FoldChange)
+plotCounts(dds, gene=res[1,]$GeneID, intgroup = PCA_Group, main=res[1,]$GeneName, 
+					 sub=paste('FC:', format(res[1,]$log2FoldChange, digits=2)), pch=19)
+
 
 
 ```
