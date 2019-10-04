@@ -80,6 +80,7 @@ biotype <- left_join(biotype, tx2gene)
 # Only need one transcript per gene
 biotype <- biotype[!duplicated(biotype$GeneID),]
 res <- left_join(res, biotype)
+res$TransID <- NULL
 
 # Write Results
 outResults <- data.frame(GeneID=res$GeneID, Gene=res$GeneName, baseMean=res$baseMean, stat=res$stat, log2FoldChange=res$log2FoldChange, pvalue=res$pvalue, padj=res$padj)

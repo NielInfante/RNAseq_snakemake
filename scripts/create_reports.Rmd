@@ -33,6 +33,14 @@ dds <- readRDS(paste0("deseq/", exp, "/dds.rds"))
 vsd <- varianceStabilizingTransformation(dds, blind=F)
 
 
+# Select genes which are ost informative,
+# ie those that have the biggest difference in expression
+asvd <- assay(vsd)
+info <- rowMax(asvd) - rowMin(asvd)
+minInfo <- info[order(info, decreasing = T)][50]
+vsd <- vsd[info > minInfo,]
+
+
 # Read Metadata and source config
 meta_file_name <- snakemake@config$metadata_file
 meta <- read_tsv(meta_file_name)
@@ -41,6 +49,7 @@ snakemake@source(paste0('../deseq/', exp, '/config.R'))
 
 # Read results
 res <- read_tsv(paste0('deseq/', exp, '/results.txt'))
+sig <- read_tsv(paste0('deseq/', exp, '/significant.txt'))
 
 # Read CV
 cv <- read_tsv(paste0('deseq/', exp, '/basemean_cutoff.txt'))
@@ -49,14 +58,26 @@ cut_value <- cv$CV[1]
 
 ## Results
 
-These are the top 10 most significant genes
+This the the format of the results table. The full list is available in the file results.txt
 ```{r results}
 
-kable(res[1:10,])
+kable(res[1:5,])
 
 ```
 
-The full list is available in the file results.txt
+| Column | Meaning |
+| --- | --- |
+| GeneID | Ensembl Gene ID |
+| GeneName | The name of the gene |
+| baseMean | Average expression of the gene across all samples |
+| log2FoldChange | log2 of the fold change of the gene |
+| lfcSE | Standard Error of the fold change |
+| stat | The test statistic of the gene, used to calculate p value. Useful in some downstream analyses |
+| pvalue | Unadjusted p value |
+| padj | p value adjusted using Benjaminni-Hockberg correction |
+| Sample Column | Normalized counts for each sample | 
+| Biotype | The Biotype of the gene. Not that currently only one biotype is picked for each gene. Some genes may have more than one biotype |
+
 
 ## Fold Change
 
@@ -90,6 +111,19 @@ ggplot(res, aes(x=log2(baseMean))) + geom_density() +
 
 Genes are filtered if the average expression across all samples is less than the cut off value, in this case `r 2^cut_value`.
 
+## Significant Genes
+A total of `r dim(sig)[1]` genes were counted as significant in this test. Genes are counted as significant if their base mean is above `r 2^cut_value` and the adjusted p value is below 0.05. No fold change criterion was used for this list.
+
+The top ten significant genes are:
+
+```{r significant}
+
+kable(sig[1:10,])
+
+```
+
+
+
 
 ## MA Plot
 
@@ -97,6 +131,7 @@ Genes are filtered if the average expression across all samples is less than the
 plotMA(dds)
 ```
 
+<!--  Remove this section 
 ## Sample Distance
 
 ```{r sample_heat}
@@ -114,6 +149,7 @@ heatmap.2(mat, trace="none", col = rev(hmcol), margin=c(8, 8), density.info = 'n
 
 This is a heatmap of sample distances. Dark indicates the samples are closer together, based on the expression of the 100 most expressed genes.
 
+-->
 
 ## Cluster
 
@@ -169,8 +205,7 @@ legend("topleft", legend = c("FDR<0.05", "|LFC|>2", "both"), pch = 16, col = c("
 
 ```{r pheatmap, message=F, warning=F}
 
-rld <- rlogTransformation(dds)
-
+rld <- rlog(dds, blind = F)
 
 # Get 15 up, 15 down 
 
