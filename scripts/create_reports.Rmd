@@ -27,17 +27,17 @@ library(knitr)
 exp <- snakemake@params$exp
 dds <- readRDS(paste0("deseq/", exp, "/dds.rds"))
 
-#vsd <- vst(dds, blind=F)
+vsd <- vst(dds, blind=F)
 
 # For testing only
-vsd <- varianceStabilizingTransformation(dds, blind=F)
+#vsd <- varianceStabilizingTransformation(dds, blind=F)
 
 
 # Select genes which are ost informative,
 # ie those that have the biggest difference in expression
 asvd <- assay(vsd)
 info <- rowMax(asvd) - rowMin(asvd)
-minInfo <- info[order(info, decreasing = T)][50]
+minInfo <- info[order(info, decreasing = T)][500]
 vsd <- vsd[info > minInfo,]
 
 
@@ -65,18 +65,56 @@ kable(res[1:5,])
 
 ```
 
-| Column | Meaning |
-| --- | --- |
-| GeneID | Ensembl Gene ID |
-| GeneName | The name of the gene |
-| baseMean | Average expression of the gene across all samples |
-| log2FoldChange | log2 of the fold change of the gene |
-| lfcSE | Standard Error of the fold change |
-| stat | The test statistic of the gene, used to calculate p value. Useful in some downstream analyses |
-| pvalue | Unadjusted p value |
-| padj | p value adjusted using Benjaminni-Hockberg correction |
-| Sample Column | Normalized counts for each sample | 
-| Biotype | The Biotype of the gene. Not that currently only one biotype is picked for each gene. Some genes may have more than one biotype |
+<smaller>
+<table>
+	<tr>
+		<th>Column</th>
+		<th>Meaning</th>
+	</tr>
+	<tr>
+		<td>GeneID</td>
+		<td>Ensembl Gene ID</td>
+	</tr>
+	<tr>
+		<td>GeneName</td>
+		<td>The name of the gene</td>
+	</tr>
+	<tr>
+		<td>baseMean</td>
+		<td>Average expression of the gene across all samples</td>
+	</tr>
+	<tr>
+		<td>log2FoldChange</td>
+		<td>log2 of the fold change of the gene</td>
+	</tr>
+	<tr>
+		<td>lfcSE</td>
+		<td>Standard Error of the fold change</td>
+	</tr>
+	<tr>
+		<td>stat</td>
+		<td>The test statistic of the gene, used to calculate p value. Useful in some downstream analyses</td>
+	</tr>
+	<tr>
+		<td>pvalue</td>
+		<td>Unadjusted p value</td>
+	</tr>
+	<tr>
+		<td>padj</td>
+		<td>p value adjusted using Benjaminni-Hockberg correction</td>
+	</tr>
+	<tr>
+		<td>Sample Column</td>
+		<td>Normalized counts for each sample</td>
+	</tr>
+	<tr>
+		<td>Biotype</td>
+		<td>The Biotype of the gene. Note that currently only one biotype is picked for each gene. Some genes may have more than one biotype</td>
+	</tr>
+</table>
+</smaller>
+
+
 
 
 ## Fold Change
@@ -88,16 +126,9 @@ plotCounts(dds, gene=res[1,]$GeneID, intgroup = PCA_Group, main=res[1,]$GeneName
 					 sub=paste('FC:', format(res[1,]$log2FoldChange, digits=2)), pch=19)
 
 
-
-title=paste(res[1,]$GeneName, "\nFold Change:",res[1,]$log2FoldChange)
-plotCounts(dds, gene=res[1,]$GeneID, intgroup = PCA_Group, main=res[1,]$GeneName, 
-					 sub=paste('FC:', format(res[1,]$log2FoldChange, digits=2)), pch=19)
-
-
-
 ```
 
-Fold change is reported as log2 (Fold Change). This graph give you an idea of what a positive versus negative fold change means.
+Fold change is reported as log2 (Fold Change). This graph gives you an idea of what a positive versus negative fold change means.
 
 ## Expression Cutoff
 
@@ -114,11 +145,13 @@ Genes are filtered if the average expression across all samples is less than the
 ## Significant Genes
 A total of `r dim(sig)[1]` genes were counted as significant in this test. Genes are counted as significant if their base mean is above `r 2^cut_value` and the adjusted p value is below 0.05. No fold change criterion was used for this list.
 
-The top ten significant genes are:
+The top significant genes are:
 
 ```{r significant}
 
-kable(sig[1:10,])
+num_to_show <- min(10, dim(sig)[1])
+
+kable(sig[1:num_to_show,])
 
 ```
 
@@ -238,7 +271,7 @@ rownames(df) <- colData(rld15)[,c('Graph_Display')]
 colnames(mat) <- colData(rld15)[,c('Graph_Display')]
 
 
-pheatmap(mat, cutree_rows = 2, cutree_cols = 2, annotation_col = df)
+pheatmap(mat, cutree_rows = 2, cutree_cols = 2, annotation_col = df, angle_col = "45")
 
 ```
 
