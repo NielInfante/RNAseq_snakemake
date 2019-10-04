@@ -56,27 +56,36 @@ dds <- dds[keep,] # filter them out
 
 dds <- DESeq(dds)
 
+# Save dds
+saveRDS(dds, paste0(outDir, '/', outPrefix, '/dds.rds'))
+
+
+# Get results and extra data
 res<-results(dds, contrast=contrast)
 res<-res[order(res$padj),]
 res <- as.data.frame(res)
 res$GeneID <- row.names(res)
 
-# Save dds
-saveRDS(dds, paste0(outDir, '/', outPrefix, '/dds.rds'))
+# Add count data
+cnt <- as.data.frame(counts(dds, normalized=T))
+names(cnt) <- colData(dds)[,sample_column]
+cnt$GeneID <- row.names(cnt)
+res <- inner_join(res, cnt)
 
 
+# Add Biotypes
 biotype <- read_tsv('Data/Biotype')
 biotype <- left_join(biotype, tx2gene)
 
 # Only need one transcript per gene
 biotype <- biotype[!duplicated(biotype$GeneID),]
-
 res <- left_join(res, biotype)
 
 # Write Results
 outResults <- data.frame(GeneID=res$GeneID, Gene=res$GeneName, baseMean=res$baseMean, stat=res$stat, log2FoldChange=res$log2FoldChange, pvalue=res$pvalue, padj=res$padj)
+res <- res %>% select(GeneID, GeneName, everything())
 name <- paste(outDir, '/', outPrefix, '/results.txt', sep="") 
-write.table(outResults, file=name, sep="\t", quote=F, row.names=F)
+write.table(res, file=name, sep="\t", quote=F, row.names=F)
 
 # Significant genes
 r2 <- res[!(is.na(res$padj)),]
