@@ -29,6 +29,7 @@ dds <- readRDS(paste0("deseq/", exp, "/dds.rds"))
 
 vsd <- vst(dds, blind=F)
 
+
 # For testing only
 #vsd <- varianceStabilizingTransformation(dds, blind=F)
 
@@ -54,6 +55,7 @@ sig <- read_tsv(paste0('deseq/', exp, '/significant.txt'))
 # Read CV
 cv <- read_tsv(paste0('deseq/', exp, '/basemean_cutoff.txt'))
 cut_value <- cv$CV[1]
+max_y <- cv$MY[1]
 ```
 
 ## Results
@@ -135,7 +137,7 @@ Fold change is reported as log2 (Fold Change). This graph gives you an idea of w
 ```{r expr_cut}
 ggplot(res, aes(x=log2(baseMean))) + geom_density() + 
 	geom_vline(xintercept=cut_value, color='red') +
-	geom_text(aes(x=cut_value, y=.6, label='   Expression Cutoff', hjust='left'), color='red')
+	geom_text(aes(x=cut_value, y=0.7 * max_y, label='   Expression Cutoff', hjust='left'), color='red')
 
 
 ```
