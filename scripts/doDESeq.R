@@ -47,6 +47,9 @@ print(files)
 
 txi <- tximport(files, type='salmon', tx2gene = tx2gene)
 
+
+print('Did tximport')
+
 dds <- DESeqDataSetFromTximport(txi, meta, design)
 
 # How many genes, out of those with at least a single count, have three samples with a count of 10 or more
