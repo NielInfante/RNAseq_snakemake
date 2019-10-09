@@ -58,6 +58,30 @@ cut_value <- cv$CV[1]
 max_y <- cv$MY[1]
 ```
 
+
+## Table of Contents
+
+<UL>
+	<LI>Results Table
+	<UL>
+		<LI><a href="#(3)">Table</a>
+		<LI><a href="#(4)">Explanation of Columns</a>
+		<LI><a href="#(5)">Fold Change Visualization</a>
+		<LI><a href="#(6)">Expression Cutoff</a>
+		<LI><a href="#(7)">Significant Genes</a>
+	</UL>
+	<LI>Visualizations
+	<UL>
+		<LI><a href="#(8)">MA Plot</a>
+		<LI><a href="#(9)">Cluster</a>
+		<LI><a href="#(10)">PCA</a>
+		<LI><a href="#(11)">PCA with names</a>
+		<LI><a href="#(12)">Volcano</a>
+		<LI><a href="#(13)">Expression Heatmap</a>
+	</UL>
+</UL>	
+		
+
 ## Results
 
 This the the format of the results table. The full list is available in the file results.txt
