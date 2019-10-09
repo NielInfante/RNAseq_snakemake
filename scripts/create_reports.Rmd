@@ -22,23 +22,26 @@ library(ggrepel)
 library(gplots)
 library(pheatmap)
 library(knitr)
+library(DT)
+library(kableExtra)
 
 # Read dds
 exp <- snakemake@params$exp
 dds <- readRDS(paste0("deseq/", exp, "/dds.rds"))
 
-vsd <- vst(dds, blind=F)
+#vsd <- vst(dds, blind=F)
 
 
 # For testing only
-#vsd <- varianceStabilizingTransformation(dds, blind=F)
+vsd <- varianceStabilizingTransformation(dds, blind=F)
 
 
 # Select genes which are ost informative,
 # ie those that have the biggest difference in expression
 asvd <- assay(vsd)
 info <- rowMax(asvd) - rowMin(asvd)
-minInfo <- info[order(info, decreasing = T)][500]
+#minInfo <- info[order(info, decreasing = T)][500]
+minInfo <- info[order(info, decreasing = T)][5]
 vsd <- vsd[info > minInfo,]
 
 
@@ -60,7 +63,6 @@ max_y <- cv$MY[1]
 
 
 ## Table of Contents
-
 <UL>
 	<LI>Results Table
 	<UL>
@@ -70,6 +72,8 @@ max_y <- cv$MY[1]
 		<LI><a href="#(6)">Expression Cutoff</a>
 		<LI><a href="#(7)">Significant Genes</a>
 	</UL>
+</UL>
+<UL>
 	<LI>Visualizations
 	<UL>
 		<LI><a href="#(8)">MA Plot</a>
@@ -87,60 +91,51 @@ max_y <- cv$MY[1]
 This the the format of the results table. The full list is available in the file results.txt
 ```{r results}
 
-kable(res[1:5,])
+tableToShow <- res %>% select(GeneName, baseMean, log2FoldChange, padj, Biotype)
+
+
+#kable(res[1:5,])
+
+datatable(tableToShow, filter='bottom', options = list(pageLength=15))
+
 
 ```
 
-<smaller>
-<table>
-	<tr>
-		<th>Column</th>
-		<th>Meaning</th>
-	</tr>
-	<tr>
-		<td>GeneID</td>
-		<td>Ensembl Gene ID</td>
-	</tr>
-	<tr>
-		<td>GeneName</td>
-		<td>The name of the gene</td>
-	</tr>
-	<tr>
-		<td>baseMean</td>
-		<td>Average expression of the gene across all samples</td>
-	</tr>
-	<tr>
-		<td>log2FoldChange</td>
-		<td>log2 of the fold change of the gene</td>
-	</tr>
-	<tr>
-		<td>lfcSE</td>
-		<td>Standard Error of the fold change</td>
-	</tr>
-	<tr>
-		<td>stat</td>
-		<td>The test statistic of the gene, used to calculate p value. Useful in some downstream analyses</td>
-	</tr>
-	<tr>
-		<td>pvalue</td>
-		<td>Unadjusted p value</td>
-	</tr>
-	<tr>
-		<td>padj</td>
-		<td>p value adjusted using Benjaminni-Hockberg correction</td>
-	</tr>
-	<tr>
-		<td>Sample Column</td>
-		<td>Normalized counts for each sample</td>
-	</tr>
-	<tr>
-		<td>Biotype</td>
-		<td>The Biotype of the gene. Note that currently only one biotype is picked for each gene. Some genes may have more than one biotype</td>
-	</tr>
-</table>
-</smaller>
 
+## Explanation of Columns
 
+```{r explain_col}
+
+columns <- c('GeneID',
+						 'GeneName',
+						 'baseMean',
+						 'log2FoldChange',
+						 'lfcSE',
+						 'stat',
+						 'pvalue',
+						 'padj',
+						 'Sample Columns',
+						 'biotype')
+
+meanings <- c('Ensembl Gene ID',
+							'The name of the gene',
+							'Average expression of the gene across all samples',
+							'log2 of the fold change of the gene',
+							'Standard Error of the fold change',
+							'The test statistic of the gene, used to calculate p value. Useful in some downstream analyses',
+							'Unadjusted p value',
+							'p value adjusted using Benjaminni-Hockberg correction',
+							'Normalized counts for each sample',
+							'The Biotype of the gene. Note that currently only one biotype is picked for each gene. Some genes may have more than one biotype')
+
+exp_col <- data.frame(Column=columns, Meaning=meanings)
+
+kable(exp_col) %>% 
+	kable_styling('striped', full_width = F) %>%
+  column_spec(1, bold = F, border_right = T) %>%
+  column_spec(2, width = "50em")	
+
+```
 
 
 ## Fold Change
@@ -225,7 +220,7 @@ plot(hclust(dist(t(assay(vsd)))), label=with(colData(dds), paste(Graph_Display))
 print(plotPCA(vsd, intgroup=c(PCA_Group)))
 ```
 
-A Principle Conmponent plot of the data. Each point is a sample.
+A Principle Component plot of the data. Each point is a sample.
 
 
 ## PCA with Names
