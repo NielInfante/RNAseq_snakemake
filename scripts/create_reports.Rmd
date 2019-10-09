@@ -96,7 +96,7 @@ tableToShow <- res %>% select(GeneName, baseMean, log2FoldChange, padj, Biotype)
 
 #kable(res[1:5,])
 
-datatable(tableToShow, filter='bottom', options = list(pageLength=15))
+datatable(tableToShow, filter='bottom', options = list(pageLength=10))
 
 
 ```
@@ -170,9 +170,12 @@ The top significant genes are:
 
 ```{r significant}
 
-num_to_show <- min(10, dim(sig)[1])
 
-kable(sig[1:num_to_show,])
+tableToShow <- sig %>% select(-GeneID, -stat, -lfcSE, -pvalue)
+
+datatable(tableToShow, filter='bottom', options = list(pageLength=10, scrollX=T))
+
+
 
 ```
 
