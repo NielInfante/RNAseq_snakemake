@@ -1,4 +1,4 @@
-name: Leonardi_2019_09
+name: snake_no_conda
 channels:
   - bioconda
   - conda-forge
