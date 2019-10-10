@@ -87,15 +87,21 @@ max_y <- cv$MY[1]
 
 ## Results
 
-This the the format of the results table. The full list is available in the file results.txt
+This is the format of the results table, only 500 out of `{r dim(res)[1]` genes are shown. The full list, with more columns, is available in the file results.txt.
 ```{r results}
 
 tableToShow <- res %>% select(GeneName, baseMean, log2FoldChange, padj, Biotype)
 
+tableToShow <- tableToShow[1:500,]
+
+tableToShow$padj <- signif(tableToShow$padj, digits=4)
+
 
 #kable(res[1:5,])
 
-datatable(tableToShow, filter='bottom', options = list(pageLength=10))
+datatable(tableToShow, filter='bottom', options = list(pageLength=10)) %>% 
+	formatRound('log2FoldChange', 3) %>% 
+	formatRound('baseMean', 0)
 
 
 ```
@@ -114,7 +120,9 @@ columns <- c('GeneID',
 						 'pvalue',
 						 'padj',
 						 'Sample Columns',
-						 'biotype')
+						 'biotype',
+						 'Sample TPM',
+						 'meanTPM')
 
 meanings <- c('Ensembl Gene ID',
 							'The name of the gene',
@@ -125,7 +133,9 @@ meanings <- c('Ensembl Gene ID',
 							'Unadjusted p value',
 							'p value adjusted using Benjaminni-Hockberg correction',
 							'Normalized counts for each sample',
-							'The Biotype of the gene. Note that currently only one biotype is picked for each gene. Some genes may have more than one biotype')
+							'The Biotype of the gene. Note that currently only one biotype is picked for each gene. Some genes may have more than one biotype',
+							'Transcripts Pre Million for each sample',
+							'Average of TPM across samples')
 
 exp_col <- data.frame(Column=columns, Meaning=meanings)
 
@@ -163,7 +173,7 @@ ggplot(res, aes(x=log2(baseMean))) + geom_density() +
 Genes are filtered if the average expression across all samples is less than the cut off value, in this case `r round(2^cut_value)`.
 
 ## Significant Genes
-A total of `r dim(sig)[1]` genes were counted as significant in this test. Genes are counted as significant if their base mean is above `r round(2^cut_value)`, the adjusted p value is below 0.05, and there is a fold change of at least 1.5.
+A total of `r dim(sig)[1]` genes were counted as significant in this test. Genes are counted as significant if their base mean is above `r signig(2^cut_value, digits=2)`, the adjusted p value is below 0.05, and there is a fold change of at least 1.5.
 
 The top significant genes are:
 
@@ -172,8 +182,13 @@ The top significant genes are:
 
 tableToShow <- sig %>% select(-GeneID, -stat, -lfcSE, -pvalue)
 
-datatable(tableToShow, filter='bottom', options = list(pageLength=10, scrollX=T))
+tableToShow$padj <- signif(tableToShow$padj, digits=4)
 
+#kable(res[1:5,])
+
+datatable(tableToShow, filter='bottom', options = list(pageLength=10, scrollX=T)) %>% 
+	formatRound('log2FoldChange', 3) %>% 
+	formatRound('baseMean', 0)
 
 
 ```

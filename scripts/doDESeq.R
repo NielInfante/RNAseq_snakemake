@@ -41,15 +41,19 @@ outDir <- "deseq"
 
 files <- paste0('salmon/', samples, '/quant.sf')
 
-getwd()
 print("Files are:")
 print(files)
 
 txi <- tximport(files, type='salmon', tx2gene = tx2gene)
 
+tpm <- as.data.frame(txi$abundance)
+names(tpm) <- paste0(samples, '_TPM')
+tpm$meanTPM <- rowMeans(tpm)
+tpm$GeneID <- row.names(tpm)
 
 print('Did tximport')
 
+# Import into DESeq object
 dds <- DESeqDataSetFromTximport(txi, meta, design)
 
 # How many genes, out of those with at least a single count, have three samples with a count of 10 or more
@@ -57,6 +61,7 @@ dds <- dds[rowSums(counts(dds)) > 0,]
 keep <- rowSums(counts(dds) >= 10) >= 3
 dds <- dds[keep,] # filter them out
 
+# Do the DESeq analysis
 dds <- DESeq(dds)
 
 # Save dds
@@ -84,6 +89,10 @@ biotype <- left_join(biotype, tx2gene)
 biotype <- biotype[!duplicated(biotype$GeneID),]
 res <- left_join(res, biotype)
 res$TransID <- NULL
+
+# Add TPM
+res <- left_join(res, tpm)
+
 
 # Write Results
 outResults <- data.frame(GeneID=res$GeneID, Gene=res$GeneName, baseMean=res$baseMean, stat=res$stat, log2FoldChange=res$log2FoldChange, pvalue=res$pvalue, padj=res$padj)
