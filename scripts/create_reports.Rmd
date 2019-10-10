@@ -57,7 +57,7 @@ sig <- read_tsv(paste0('deseq/', exp, '/significant.txt'))
 # Read CV
 cv <- read_tsv(paste0('deseq/', exp, '/basemean_cutoff.txt'))
 cut_value <- cv$CV[1]
-max_y <- cv$MY[1]
+#max_y <- cv$MY[1]
 ```
 
 
@@ -87,10 +87,10 @@ max_y <- cv$MY[1]
 
 ## Results
 
-This is the format of the results table, only 500 out of `{r dim(res)[1]` genes are shown. The full list, with more columns, is available in the file results.txt.
+This is the format of the results table, only 500 out of `r dim(res)[1]` genes are shown. The full list, with more columns, is available in the file results.txt.
 ```{r results}
 
-tableToShow <- res %>% select(GeneName, baseMean, log2FoldChange, padj, Biotype)
+tableToShow <- res %>% select(GeneName, baseMean, log2FoldChange, padj, Biotype, Cluster)
 
 tableToShow <- tableToShow[1:500,]
 
@@ -99,7 +99,7 @@ tableToShow$padj <- signif(tableToShow$padj, digits=4)
 
 #kable(res[1:5,])
 
-datatable(tableToShow, filter='bottom', options = list(pageLength=10)) %>% 
+datatable(tableToShow, filter='bottom', options = list(pageLength=10, lengthMenu = c(5, 10, 25))) %>% 
 	formatRound('log2FoldChange', 3) %>% 
 	formatRound('baseMean', 0)
 
@@ -119,10 +119,11 @@ columns <- c('GeneID',
 						 'stat',
 						 'pvalue',
 						 'padj',
-						 'Sample Columns',
 						 'biotype',
+						 'Sample Columns',
 						 'Sample TPM',
-						 'meanTPM')
+						 'meanTPM',
+						 'Cluster')
 
 meanings <- c('Ensembl Gene ID',
 							'The name of the gene',
@@ -132,10 +133,11 @@ meanings <- c('Ensembl Gene ID',
 							'The test statistic of the gene, used to calculate p value. Useful in some downstream analyses',
 							'Unadjusted p value',
 							'p value adjusted using Benjaminni-Hockberg correction',
-							'Normalized counts for each sample',
 							'The Biotype of the gene. Note that currently only one biotype is picked for each gene. Some genes may have more than one biotype',
+							'Normalized counts for each sample',
 							'Transcripts Pre Million for each sample',
-							'Average of TPM across samples')
+							'Average of TPM across samples',
+							'Expression cluster for filtering')
 
 exp_col <- data.frame(Column=columns, Meaning=meanings)
 
@@ -145,7 +147,7 @@ kable(exp_col) %>%
   column_spec(2, width = "50em")	
 
 ```
-
+See <a href="https://hbctraining.github.io/DGE_workshop/lessons/02_DGE_count_normalization.html">here</a> for a discussion of different count normalization methods, and when to choose which.
 
 ## Fold Change
 
@@ -163,17 +165,20 @@ Fold change is reported as log2 (Fold Change). This graph gives you an idea of w
 ## Expression Cutoff
 
 ```{r expr_cut}
-ggplot(res, aes(x=log2(baseMean))) + geom_density() + 
-	geom_vline(xintercept=cut_value, color='red') +
-	geom_text(aes(x=cut_value, y=0.7 * max_y, label='   Expression Cutoff', hjust='left'), color='red')
+#ggplot(res, aes(x=log2(baseMean))) + geom_density() + 
+#	geom_vline(xintercept=cut_value, color='red') +
+#	geom_text(aes(x=cut_value, y=0.7 * max_y, label='   Expression Cutoff', hjust='left'), color='red')
+
+ggplot(res, aes(x=log2(meanTPM + 1), fill=Cluster)) + 
+	geom_density() + scale_fill_manual(values=c('#00BA38', '#F8766D'))
 
 
 ```
 
-Genes are filtered if the average expression across all samples is less than the cut off value, in this case `r round(2^cut_value)`.
+Genes are kept or excluded based on expression clustering.
 
 ## Significant Genes
-A total of `r dim(sig)[1]` genes were counted as significant in this test. Genes are counted as significant if their base mean is above `r signig(2^cut_value, digits=2)`, the adjusted p value is below 0.05, and there is a fold change of at least 1.5.
+A total of `r dim(sig)[1]` genes were counted as significant in this test. Genes are counted as significant if the adjusted p value is below 0.05, there is a fold change of at least 1.5, and they are in the high expression cluster.
 
 The top significant genes are:
 
@@ -186,7 +191,7 @@ tableToShow$padj <- signif(tableToShow$padj, digits=4)
 
 #kable(res[1:5,])
 
-datatable(tableToShow, filter='bottom', options = list(pageLength=10, scrollX=T)) %>% 
+datatable(tableToShow, filter='bottom', options = list(pageLength=10, lengthMenu = c(5, 10, 25), scrollX=T)) %>% 
 	formatRound('log2FoldChange', 3) %>% 
 	formatRound('baseMean', 0)
 
