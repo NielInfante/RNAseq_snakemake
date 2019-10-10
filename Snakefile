@@ -62,7 +62,7 @@ rule multiQC:
     output:
         "QC/report.html"
     shell:
-        "multiqc -n {output} QC/FastQC salmon"
+        "multiqc -f -n {output} QC/FastQC salmon"
 
 
 rule salmon_build_index:
