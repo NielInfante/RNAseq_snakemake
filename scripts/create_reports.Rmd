@@ -29,19 +29,18 @@ library(kableExtra)
 exp <- snakemake@params$exp
 dds <- readRDS(paste0("deseq/", exp, "/dds.rds"))
 
-#vsd <- vst(dds, blind=F)
+vsd <- vst(dds, blind=F)
 
 
 # For testing only
-vsd <- varianceStabilizingTransformation(dds, blind=F)
+#vsd <- varianceStabilizingTransformation(dds, blind=F)
 
 
 # Select genes which are ost informative,
 # ie those that have the biggest difference in expression
 asvd <- assay(vsd)
 info <- rowMax(asvd) - rowMin(asvd)
-#minInfo <- info[order(info, decreasing = T)][500]
-minInfo <- info[order(info, decreasing = T)][5]
+minInfo <- info[order(info, decreasing = T)][500]
 vsd <- vsd[info > minInfo,]
 
 
@@ -161,10 +160,10 @@ ggplot(res, aes(x=log2(baseMean))) + geom_density() +
 
 ```
 
-Genes are filtered if the average expression across all samples is less than the cut off value, in this case `r 2^cut_value`.
+Genes are filtered if the average expression across all samples is less than the cut off value, in this case `r round(2^cut_value)`.
 
 ## Significant Genes
-A total of `r dim(sig)[1]` genes were counted as significant in this test. Genes are counted as significant if their base mean is above `r 2^cut_value` and the adjusted p value is below 0.05. No fold change criterion was used for this list.
+A total of `r dim(sig)[1]` genes were counted as significant in this test. Genes are counted as significant if their base mean is above `r round(2^cut_value)`, the adjusted p value is below 0.05, and there is a fold change of at least 1.5.
 
 The top significant genes are:
 

@@ -118,7 +118,8 @@ write.table(data.frame(CV=c(cut_value), MY=c(maxY)), file=paste(outDir, "/", out
 resSig <- res[!(is.na(res$padj)),] # Keep only genes that have a calculated adjusted p
 resSig <- resSig[ resSig$padj < 0.05, ] # Keep adjusted p less than 0.05
 resSig <- resSig[resSig$baseMean > (2^cut_value), ] # Keep genes with enough expression
-
+resSig <- resSig[abs(resSig$log2FoldChange) > 0.585, ] # Kep genes with a fold change of at least 1.5
+	
 write.table(resSig,file=paste(outDir, "/", outPrefix, "/significant.txt", sep=""), sep="\t", quote=F, row.names=F)
 
 
