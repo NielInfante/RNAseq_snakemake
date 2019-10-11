@@ -1,6 +1,6 @@
 ---
 title: "RNA seq Report"
-author: "Niel Infante"
+author: "WVU Bioinformatics Core"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: slidy_presentation
 ---
@@ -59,7 +59,6 @@ cv <- read_tsv(paste0('deseq/', exp, '/basemean_cutoff.txt'))
 cut_value <- cv$CV[1]
 #max_y <- cv$MY[1]
 ```
-
 
 ## Table of Contents
 <UL>
