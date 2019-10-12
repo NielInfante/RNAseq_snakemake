@@ -8,7 +8,7 @@ To use this pipeline, create a new repo using this one as a template (click the 
 Now, you need to confirm all the needed software is installed. The easiest way to do this is to install [miniconda](https://docs.conda.io/en/latest/miniconda.html), then create a conda environment to run in. I suggest:
 
 ```{sh}
-conda env create -f envs/snake_no_conda
+conda env create -f envs/snake_no_conda.yaml
 ```
 
 This will create a conda environment called snake_no_conda. If you want a different name, change it in the yaml file before creating.
