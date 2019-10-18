@@ -41,12 +41,19 @@ outDir <- "deseq"
 
 files <- paste0('salmon/', samples, '/quant.sf')
 
-getwd()
 print("Files are:")
 print(files)
 
 txi <- tximport(files, type='salmon', tx2gene = tx2gene)
 
+tpm <- as.data.frame(txi$abundance)
+names(tpm) <- paste0(samples, '_TPM')
+tpm$meanTPM <- rowMeans(tpm)
+tpm$GeneID <- row.names(tpm)
+
+print('Did tximport')
+
+# Import into DESeq object
 dds <- DESeqDataSetFromTximport(txi, meta, design)
 
 # How many genes, out of those with at least a single count, have three samples with a count of 10 or more
@@ -54,6 +61,7 @@ dds <- dds[rowSums(counts(dds)) > 0,]
 keep <- rowSums(counts(dds) >= 10) >= 3
 dds <- dds[keep,] # filter them out
 
+# Do the DESeq analysis
 dds <- DESeq(dds)
 
 # Save dds
@@ -82,40 +90,69 @@ biotype <- biotype[!duplicated(biotype$GeneID),]
 res <- left_join(res, biotype)
 res$TransID <- NULL
 
+# Add TPM
+res <- left_join(res, tpm)
+
+# Significant genes
+
+## Get an appropriate base mean cutoff value
+# Old way, now trying clustering
+
+den <- density(log2(res$meanTPM + 1))
+maxY <- max(den$y)
+#maxAt <- which.max(den$y)
+
+#for (i in (maxAt + 1):length(den$y)){
+#	diff <- den$y[i] - den$y[i-1]
+#	if (diff > 0){
+#		cut_index <- i - 1
+#		break
+#	}
+#}
+
+#if (cut_index < 0){
+#	cut_value <- median(log2(res$baseMean))
+#} else {
+#	cut_value <- den$x[cut_index]	
+#}
+
+
+# Use k means clustering on log2 mean TPM plus 1
+# First cluster should be basal expression,
+# Second cluster should be genes we're interested in.
+km <- kmeans(log2(res$meanTPM + 1), 2)
+
+res$Cluster <- km$cluster
+# Want  to keep the cluster with the larger expression value
+if (km$centers[1] > km$centers[2]){
+	res <- res %>% mutate(Cluster=ifelse(Cluster==1, 'In','Out'))
+} else {
+	res <- res %>% mutate(Cluster=ifelse(Cluster==1, 'Out','In'))
+}
+
+inMin <- min(res[res$Cluster == 'In',]$meanTPM)
+outMax <- max(res[res$Cluster == 'Out',]$meanTPM)
+cut_value <- log2(mean(inMin, outMax) + 1)
+
+# write out cutoff so I can use it in report
+write.table(data.frame(CV=c(cut_value), MY=c(maxY)), file=paste(outDir, "/", outPrefix, "/basemean_cutoff.txt", sep=""), sep="\t", quote=F, row.names=F)
+
+
+
 # Write Results
 outResults <- data.frame(GeneID=res$GeneID, Gene=res$GeneName, baseMean=res$baseMean, stat=res$stat, log2FoldChange=res$log2FoldChange, pvalue=res$pvalue, padj=res$padj)
 res <- res %>% select(GeneID, GeneName, everything())
 name <- paste(outDir, '/', outPrefix, '/results.txt', sep="") 
 write.table(res, file=name, sep="\t", quote=F, row.names=F)
 
-# Significant genes
 
-## Get an appropriate base mean cutoff value
-den <- density(log2(res$baseMean))
-maxY <- max(den$y)
-maxAt <- which.max(den$y)
-
-for (i in (maxAt + 1):length(den$y)){
-	diff <- den$y[i] - den$y[i-1]
-	if (diff > 0){
-		cut_index <- i - 1
-		break
-	}
-}
-
-if (cut_index < 0){
-	cut_value <- median(log2(res$baseMean))
-} else {
-	cut_value <- den$x[cut_index]	
-}
-
-# write out cutoff so I can use it in report
-write.table(data.frame(CV=c(cut_value), MY=c(maxY)), file=paste(outDir, "/", outPrefix, "/basemean_cutoff.txt", sep=""), sep="\t", quote=F, row.names=F)
 
 resSig <- res[!(is.na(res$padj)),] # Keep only genes that have a calculated adjusted p
 resSig <- resSig[ resSig$padj < 0.05, ] # Keep adjusted p less than 0.05
-resSig <- resSig[resSig$baseMean > (2^cut_value), ] # Keep genes with enough expression
-
+#resSig <- resSig[resSig$baseMean > (2^cut_value), ] # Keep genes with enough expression
+resSig <- resSig %>% filter(Cluster == 'In') # Keep only the second cluster
+resSig <- resSig[abs(resSig$log2FoldChange) > 0.585, ] # Kep genes with a fold change of at least 1.5
+	
 write.table(resSig,file=paste(outDir, "/", outPrefix, "/significant.txt", sep=""), sep="\t", quote=F, row.names=F)
 
 

@@ -1,6 +1,6 @@
 ---
 title: "RNA seq Report"
-author: "Niel Infante"
+author: "WVU Bioinformatics Core"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: slidy_presentation
 ---
@@ -22,6 +22,8 @@ library(ggrepel)
 library(gplots)
 library(pheatmap)
 library(knitr)
+library(DT)
+library(kableExtra)
 
 # Read dds
 exp <- snakemake@params$exp
@@ -58,66 +60,93 @@ cut_value <- cv$CV[1]
 max_y <- cv$MY[1]
 ```
 
+## Table of Contents
+<UL>
+	<LI>Results Table
+	<UL>
+		<LI><a href="#(3)">Table</a>
+		<LI><a href="#(4)">Explanation of Columns</a>
+		<LI><a href="#(5)">Fold Change Visualization</a>
+		<LI><a href="#(6)">Expression Cutoff</a>
+		<LI><a href="#(7)">Significant Genes</a>
+	</UL>
+</UL>
+<UL>
+	<LI>Visualizations
+	<UL>
+		<LI><a href="#(8)">MA Plot</a>
+		<LI><a href="#(9)">Cluster</a>
+		<LI><a href="#(10)">PCA</a>
+		<LI><a href="#(11)">PCA with names</a>
+		<LI><a href="#(12)">Volcano</a>
+		<LI><a href="#(13)">Expression Heatmap</a>
+	</UL>
+</UL>	
+		
+
 ## Results
 
-This the the format of the results table. The full list is available in the file results.txt
+This is the format of the results table, only 500 out of `r dim(res)[1]` genes are shown. The full list, with more columns, is available in the file results.txt.
 ```{r results}
 
-kable(res[1:5,])
+tableToShow <- res %>% select(GeneName, baseMean, log2FoldChange, padj, Biotype, Cluster)
+
+tableToShow <- tableToShow[1:500,]
+
+tableToShow$padj <- signif(tableToShow$padj, digits=4)
+
+
+#kable(res[1:5,])
+
+datatable(tableToShow, filter='bottom', options = list(pageLength=10, lengthMenu = c(5, 10, 25))) %>% 
+	formatRound('log2FoldChange', 3) %>% 
+	formatRound('baseMean', 0)
+
 
 ```
 
-<smaller>
-<table>
-	<tr>
-		<th>Column</th>
-		<th>Meaning</th>
-	</tr>
-	<tr>
-		<td>GeneID</td>
-		<td>Ensembl Gene ID</td>
-	</tr>
-	<tr>
-		<td>GeneName</td>
-		<td>The name of the gene</td>
-	</tr>
-	<tr>
-		<td>baseMean</td>
-		<td>Average expression of the gene across all samples</td>
-	</tr>
-	<tr>
-		<td>log2FoldChange</td>
-		<td>log2 of the fold change of the gene</td>
-	</tr>
-	<tr>
-		<td>lfcSE</td>
-		<td>Standard Error of the fold change</td>
-	</tr>
-	<tr>
-		<td>stat</td>
-		<td>The test statistic of the gene, used to calculate p value. Useful in some downstream analyses</td>
-	</tr>
-	<tr>
-		<td>pvalue</td>
-		<td>Unadjusted p value</td>
-	</tr>
-	<tr>
-		<td>padj</td>
-		<td>p value adjusted using Benjaminni-Hockberg correction</td>
-	</tr>
-	<tr>
-		<td>Sample Column</td>
-		<td>Normalized counts for each sample</td>
-	</tr>
-	<tr>
-		<td>Biotype</td>
-		<td>The Biotype of the gene. Note that currently only one biotype is picked for each gene. Some genes may have more than one biotype</td>
-	</tr>
-</table>
-</smaller>
 
+## Explanation of Columns
 
+```{r explain_col}
 
+columns <- c('GeneID',
+						 'GeneName',
+						 'baseMean',
+						 'log2FoldChange',
+						 'lfcSE',
+						 'stat',
+						 'pvalue',
+						 'padj',
+						 'biotype',
+						 'Sample Columns',
+						 'Sample TPM',
+						 'meanTPM',
+						 'Cluster')
+
+meanings <- c('Ensembl Gene ID',
+							'The name of the gene',
+							'Average expression of the gene across all samples',
+							'log2 of the fold change of the gene',
+							'Standard Error of the fold change',
+							'The test statistic of the gene, used to calculate p value. Useful in some downstream analyses',
+							'Unadjusted p value',
+							'p value adjusted using Benjaminni-Hockberg correction',
+							'The Biotype of the gene. Note that currently only one biotype is picked for each gene. Some genes may have more than one biotype',
+							'Normalized counts for each sample',
+							'Transcripts Pre Million for each sample',
+							'Average of TPM across samples',
+							'Expression cluster for filtering')
+
+exp_col <- data.frame(Column=columns, Meaning=meanings)
+
+kable(exp_col) %>% 
+	kable_styling('striped', full_width = F) %>%
+  column_spec(1, bold = F, border_right = T) %>%
+  column_spec(2, width = "50em")	
+
+```
+See <a href="https://hbctraining.github.io/DGE_workshop/lessons/02_DGE_count_normalization.html">here</a> for a discussion of different count normalization methods, and when to choose which.
 
 ## Fold Change
 
@@ -135,25 +164,53 @@ Fold change is reported as log2 (Fold Change). This graph gives you an idea of w
 ## Expression Cutoff
 
 ```{r expr_cut}
-ggplot(res, aes(x=log2(baseMean))) + geom_density() + 
+
+#ggplot(res, aes(x=log2(meanTPM + 1), fill=Cluster)) + 
+#	geom_density() + scale_fill_manual(values=c('#00BA38', '#F8766D'))
+
+ggplot(res, aes(x=log2(meanTPM+1))) + geom_density() + 
 	geom_vline(xintercept=cut_value, color='red') +
-	geom_text(aes(x=cut_value, y=0.7 * max_y, label='   Expression Cutoff', hjust='left'), color='red')
+	geom_text(aes(x=cut_value, y=0.7 * max_y, label='   Expression Cutoff',    hjust='left'), color='red')
+
 
 
 ```
 
-Genes are filtered if the average expression across all samples is less than the cut off value, in this case `r 2^cut_value`.
+Genes are kept or excluded based on expression clustering.
+
+```{r alt_exp_cut, eval=F}
+
+# An alternate plot for the expression cut off
+
+ggplot(res, aes(x=log2(meanTPM + 1), y=..count.. + 1) ) + 
+	ggridges::geom_density_line( aes(fill=Cluster, color=Cluster), alpha=0.25 ) + 
+	ggridges::geom_density_line( data=select(res, -Cluster) , alpha=0.25) +
+	scale_color_manual(values=c('#00BA38', '#F8766D')) + 
+  scale_fill_manual(values=c('#00BA38', '#F8766D')) 
+
+
+
+```
+
 
 ## Significant Genes
-A total of `r dim(sig)[1]` genes were counted as significant in this test. Genes are counted as significant if their base mean is above `r 2^cut_value` and the adjusted p value is below 0.05. No fold change criterion was used for this list.
+A total of `r dim(sig)[1]` genes were counted as significant in this test. Genes are counted as significant if the adjusted p value is below 0.05, there is a fold change of at least 1.5, and they are in the high expression cluster.
 
 The top significant genes are:
 
 ```{r significant}
 
-num_to_show <- min(10, dim(sig)[1])
 
-kable(sig[1:num_to_show,])
+tableToShow <- sig %>% select(-GeneID, -stat, -lfcSE, -pvalue)
+
+tableToShow$padj <- signif(tableToShow$padj, digits=4)
+
+#kable(res[1:5,])
+
+datatable(tableToShow, filter='bottom', options = list(pageLength=10, lengthMenu = c(5, 10, 25), scrollX=T)) %>% 
+	formatRound('log2FoldChange', 3) %>% 
+	formatRound('baseMean', 0)
+
 
 ```
 
@@ -201,7 +258,7 @@ plot(hclust(dist(t(assay(vsd)))), label=with(colData(dds), paste(Graph_Display))
 print(plotPCA(vsd, intgroup=c(PCA_Group)))
 ```
 
-A Principle Conmponent plot of the data. Each point is a sample.
+A Principle Component plot of the data. Each point is a sample.
 
 
 ## PCA with Names

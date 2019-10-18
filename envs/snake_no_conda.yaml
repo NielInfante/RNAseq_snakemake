@@ -21,3 +21,4 @@ dependencies:
   - multiqc = 1.7
   - r-dt = 0.9
   - r-kableextra = 1.1.0
+  
