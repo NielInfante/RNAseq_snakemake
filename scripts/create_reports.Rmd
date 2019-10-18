@@ -168,7 +168,7 @@ Fold change is reported as log2 (Fold Change). This graph gives you an idea of w
 #ggplot(res, aes(x=log2(meanTPM + 1), fill=Cluster)) + 
 #	geom_density() + scale_fill_manual(values=c('#00BA38', '#F8766D'))
 
-ggplot(res, aes(x=log2(baseMean))) + geom_density() + 
+ggplot(res, aes(x=log2(meanTPM+1))) + geom_density() + 
 	geom_vline(xintercept=cut_value, color='red') +
 	geom_text(aes(x=cut_value, y=0.7 * max_y, label='   Expression Cutoff',    hjust='left'), color='red')
 
@@ -178,14 +178,13 @@ ggplot(res, aes(x=log2(baseMean))) + geom_density() +
 
 Genes are kept or excluded based on expression clustering.
 
-
 ```{r alt_exp_cut, eval=F}
 
 # An alternate plot for the expression cut off
 
 ggplot(res, aes(x=log2(meanTPM + 1), y=..count.. + 1) ) + 
-	ggridges::geom_density_line( aes(fill=cluster, color=cluster), alpha=0.25 ) + 
-	ggridges::geom_density_line( data=select(res, -cluster) , alpha=0.25) +
+	ggridges::geom_density_line( aes(fill=Cluster, color=Cluster), alpha=0.25 ) + 
+	ggridges::geom_density_line( data=select(res, -Cluster) , alpha=0.25) +
 	scale_color_manual(values=c('#00BA38', '#F8766D')) + 
   scale_fill_manual(values=c('#00BA38', '#F8766D')) 
 
