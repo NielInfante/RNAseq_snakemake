@@ -57,7 +57,7 @@ sig <- read_tsv(paste0('deseq/', exp, '/significant.txt'))
 # Read CV
 cv <- read_tsv(paste0('deseq/', exp, '/basemean_cutoff.txt'))
 cut_value <- cv$CV[1]
-#max_y <- cv$MY[1]
+max_y <- cv$MY[1]
 ```
 
 ## Table of Contents
@@ -164,17 +164,35 @@ Fold change is reported as log2 (Fold Change). This graph gives you an idea of w
 ## Expression Cutoff
 
 ```{r expr_cut}
-#ggplot(res, aes(x=log2(baseMean))) + geom_density() + 
-#	geom_vline(xintercept=cut_value, color='red') +
-#	geom_text(aes(x=cut_value, y=0.7 * max_y, label='   Expression Cutoff', hjust='left'), color='red')
 
-ggplot(res, aes(x=log2(meanTPM + 1), fill=Cluster)) + 
-	geom_density() + scale_fill_manual(values=c('#00BA38', '#F8766D'))
+#ggplot(res, aes(x=log2(meanTPM + 1), fill=Cluster)) + 
+#	geom_density() + scale_fill_manual(values=c('#00BA38', '#F8766D'))
+
+ggplot(res, aes(x=log2(baseMean))) + geom_density() + 
+	geom_vline(xintercept=cut_value, color='red') +
+	geom_text(aes(x=cut_value, y=0.7 * max_y, label='   Expression Cutoff',    hjust='left'), color='red')
+
 
 
 ```
 
 Genes are kept or excluded based on expression clustering.
+
+
+```{r alt_exp_cut, eval=F}
+
+# An alternate plot for the expression cut off
+
+ggplot(res, aes(x=log2(meanTPM + 1), y=..count.. + 1) ) + 
+	ggridges::geom_density_line( aes(fill=cluster, color=cluster), alpha=0.25 ) + 
+	ggridges::geom_density_line( data=select(res, -cluster) , alpha=0.25) +
+	scale_color_manual(values=c('#00BA38', '#F8766D')) + 
+  scale_fill_manual(values=c('#00BA38', '#F8766D')) 
+
+
+
+```
+
 
 ## Significant Genes
 A total of `r dim(sig)[1]` genes were counted as significant in this test. Genes are counted as significant if the adjusted p value is below 0.05, there is a fold change of at least 1.5, and they are in the high expression cluster.

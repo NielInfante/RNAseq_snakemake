@@ -98,8 +98,8 @@ res <- left_join(res, tpm)
 ## Get an appropriate base mean cutoff value
 # Old way, now trying clustering
 
-#den <- density(log2(res$baseMean))
-#maxY <- max(den$y)
+den <- density(log2(res$baseMean))
+maxY <- max(den$y)
 #maxAt <- which.max(den$y)
 
 #for (i in (maxAt + 1):length(den$y)){
@@ -116,8 +116,6 @@ res <- left_join(res, tpm)
 #	cut_value <- den$x[cut_index]	
 #}
 
-# write out cutoff so I can use it in report
-#write.table(data.frame(CV=c(cut_value), MY=c(maxY)), file=paste(outDir, "/", outPrefix, "/basemean_cutoff.txt", sep=""), sep="\t", quote=F, row.names=F)
 
 # Use k means clustering on log2 mean TPM plus 1
 # First cluster should be basal expression,
@@ -131,6 +129,14 @@ if (km$centers[1] > km$centers[2]){
 } else {
 	res <- res %>% mutate(Cluster=ifelse(Cluster==1, 'Out','In'))
 }
+
+inMin <- min(res[res$Cluster == 'In',]$meanTPM)
+outMax <- max(res[res$Cluster == 'Out',]$meanTPM)
+cut_value <- log2(mean(inMin, outMax))
+
+# write out cutoff so I can use it in report
+write.table(data.frame(CV=c(cut_value), MY=c(maxY)), file=paste(outDir, "/", outPrefix, "/basemean_cutoff.txt", sep=""), sep="\t", quote=F, row.names=F)
+
 
 
 # Write Results
