@@ -105,7 +105,7 @@ rule parseTranscripts:
         "perl scripts/parseFasta.pl {input.ref} {output.ID} {output.bio}"
 
 # Rule to install packages.
-# This shold only have to run once.
+# This should only have to run once.
 rule init_R:
     output:
         "envs/R_initialized"
@@ -125,7 +125,7 @@ rule init_R:
 # This rule will create an R config file to be used by doDESeq.R
 rule create_config_for_deseq:
     input:
-#        "envs/R_initialized"      # Only include if we really want to initialize
+        "envs/R_initialized"      # Only include if we really want to initialize
     output:
 #        temp("deseq/{experiment}/config.R")
         file="deseq/{experiment}/config.R"

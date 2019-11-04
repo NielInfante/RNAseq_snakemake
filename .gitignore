@@ -10,3 +10,4 @@ logs/*
 .DS_Store
 ._*
 nohup.out
+envs/R_initialized

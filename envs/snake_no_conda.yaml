@@ -21,4 +21,8 @@ dependencies:
   - multiqc = 1.7
   - r-dt = 0.9
   - r-kableextra = 1.1.0
+  - bioconductor-annotationdbi = 1.48.0
+  - bioconductor-gage = 2.36
+  - bioconductor-gagedata = 2.23
+  - bioconductor-biomart = 2.42
   
