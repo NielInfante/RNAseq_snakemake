@@ -25,4 +25,3 @@ dependencies:
   - bioconductor-gage = 2.36
   - bioconductor-gagedata = 2.23
   - bioconductor-biomart = 2.42
-  

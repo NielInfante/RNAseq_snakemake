@@ -49,6 +49,8 @@ rule fastqc:
 #        "QC/FastQC/{fastqFiles[sample_file]}_fastqc.zip"
         "QC/FastQC/{sample_file}_fastqc.zip"
     threads: 16
+    conda:
+        "envs/rnaseq_QC.yaml"
     shell:
         "fastqc -t {threads} {input} -o QC/FastQC"
 #        "cat {input} | fastqc -t {threads} stdin:{sample_file} -o QC/FastQC"
@@ -61,6 +63,8 @@ rule multiQC:
         expand("salmon/{sample}/quant.sf", sample=config["samples"])           # salmon quantification
     output:
         "QC/report.html"
+    conda:
+        "envs/rnaseq_QC.yaml"
     shell:
         "multiqc -f -n {output} QC/FastQC salmon"
 
@@ -70,6 +74,8 @@ rule salmon_build_index:
         ref=f"{config['reference_base']}.fa"
     output:
         directory(f"{config['reference_base']}")
+    conda:
+        "envs/rnaseq_salmon.yaml"
     shell:
         "salmon index -t {input.ref} -i {output} --type quasi -k 31"
 
@@ -90,6 +96,8 @@ rule salmon_quantification:
         #zip_ext = bz2 # req'd for bz2 files ('bz2'); optional for gz files('gz')
         extra=f"--gcBias --validateMappings --numBootstraps {config['salmon_bootstraps']}"
     threads: 16
+    conda:
+        "envs/rnaseq_salmon.yaml"
     wrapper:
         "0.38.0/bio/salmon/quant"
 
@@ -106,6 +114,7 @@ rule parseTranscripts:
 
 # Rule to install packages.
 # This should only have to run once.
+# Actually, shouldn't need this at all switching to --use-conda
 rule init_R:
     output:
         "envs/R_initialized"
@@ -125,7 +134,7 @@ rule init_R:
 # This rule will create an R config file to be used by doDESeq.R
 rule create_config_for_deseq:
     input:
-        "envs/R_initialized"      # Only include if we really want to initialize
+#        "envs/R_initialized"      # Only include if we really want to initialize
     output:
 #        temp("deseq/{experiment}/config.R")
         file="deseq/{experiment}/config.R"
@@ -161,8 +170,7 @@ rule do_deseq:
     log:
         "logs/R_deseq_{experiment}.log"
     conda:
-#        "envs/forRMD.yaml"
-        "envs/minimal_R.yaml"
+        "envs/rnaseq_deseq.yaml"
 #    shell:
 #        "Rscript scripts/doDESeq.R {params.exp} {config[metadata_file]} {config[tx2gene]}"
     script:
@@ -177,6 +185,8 @@ rule deseq_report:
         exp = lambda wildcards: f"{wildcards.experiment}"
     log:
         "logs/R_report_{experiment}.log"
+    conda:
+        "envs/forRMD.yaml"
     script:
         "scripts/create_reports.Rmd"
 

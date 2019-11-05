@@ -24,12 +24,6 @@ library(pheatmap)
 library(knitr)
 library(DT)
 library(kableExtra)
-library(gage)
-library(gageData)
-library(biomaRt)
-library("AnnotationDbi")
-organism_db <- snakemake@config$organism_db
-library(organism_db, character.only = T)
 
 
 
