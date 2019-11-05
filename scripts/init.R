@@ -18,6 +18,9 @@ organism_db <- snakemake@config$organism_db
 if (!require(organism_db, quietly = TRUE))
   BiocManager::install(organism_db, update=F)
 
+# check if it installed
+library(organism_db, character.only = T)
+
 
 # Indicator to say the script ran, and snakemake doesn't call it again.
 x <- '1'
