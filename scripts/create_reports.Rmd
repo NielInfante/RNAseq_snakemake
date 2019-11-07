@@ -30,7 +30,7 @@ library(kableExtra)
 
 # Read dds
 exp <- snakemake@params$exp
-dds <- readRDS(paste0("deseq/", exp, "/dds.rds"))
+dds <- readRDS(paste0("results/", exp, "/deseq/dds.rds"))
 
 vsd <- vst(dds, blind=F)
 
@@ -51,21 +51,22 @@ vsd <- vsd[info > minInfo,]
 meta_file_name <- snakemake@config$metadata_file
 meta <- read_tsv(meta_file_name)
 
-snakemake@source(paste0('../deseq/', exp, '/config.R'))
+#snakemake@source(paste0('../', exp, '/deseq/', 'config.R'))
+source(paste0('results/', exp, '/deseq/config.R'))
 
 # Read results
-res <- read_tsv(paste0('deseq/', exp, '/results.txt'))
-sig <- read_tsv(paste0('deseq/', exp, '/significant.txt'))
+res <- read_tsv(paste0('results/', exp, '/deseq/results.txt'))
+sig <- read_tsv(paste0('results/', exp, '/deseq/significant.txt'))
 
 # Read CV
-cv <- read_tsv(paste0('deseq/', exp, '/basemean_cutoff.txt'))
+cv <- read_tsv(paste0('results/', exp, '/deseq/basemean_cutoff.txt'))
 cut_value <- cv$CV[1]
 max_y <- cv$MY[1]
 ```
 
 ## Table of Contents
 <UL>
-	<LI>Results Table
+	<LI>Differential Expression Results Table
 	<UL>
 		<LI><a href="#(3)">Table</a>
 		<LI><a href="#(4)">Explanation of Columns</a>
@@ -75,7 +76,7 @@ max_y <- cv$MY[1]
 	</UL>
 </UL>
 <UL>
-	<LI>Visualizations
+	<LI>Visualizations of Differential Expression
 	<UL>
 		<LI><a href="#(8)">MA Plot</a>
 		<LI><a href="#(9)">Cluster</a>
@@ -85,7 +86,12 @@ max_y <- cv$MY[1]
 		<LI><a href="#(13)">Expression Heatmap</a>
 	</UL>
 </UL>	
-		
+<UL>
+	<LI>Gene Ontology
+	<UL>
+		<LI><a href="#(14)">Molecular Function</a>
+	</UL>
+</UL>
 
 ## Results
 
@@ -340,6 +346,42 @@ pheatmap(mat, cutree_rows = 2, cutree_cols = 2, annotation_col = df, angle_col =
 Heatmap shows the 15 most upregulated, and 15 most downregulated genes. Color indicates how much the expression of the gene inthe samples is different from the mean expression of that gene.
 
 
+## GO Analysis
+
+
+```{r go_mf, message=F, warning=F}
+print(getwd())
+
+res <- read_tsv(paste0("results/", exp, "/GO/MF_results.txt"))
+
+if(dim(res)[1] == 0){
+	print("No significant ontological terms were found for molecular function")
+} else {
+	res <- res %>% select(ID, Description, GeneRatio, BgRatio, p.adjust)
+	datatable(res, filter='bottom', options = list(pageLength=10, lengthMenu = c(5, 10, 25), scrollX=T)) %>% 
+	formatRound('p.adjust', 3)
+#	formatRound('baseMean', 0)
+
+}
+#![unchanged image](foo.jpg)
+#![much-smaller image](foo.jpg){#id .class width=30 height=20px}
+#![half-size image](foo.jpg){#id .class width=50% height=50%}
+
+print("now for the image")
+#![Graph Missing](`r paste0("../results/", exp, "/MF_bar.png)")`)	
+#`r print(paste0("../results/", exp, "/GO/MF_bar.png)"))`
+#`r paste0("../results/", exp, "/GO/MF_bar.png)")`
+#![Graph Missing](../results/120d/GO/MF_bar.png)	
+#![Graph Missing](results/120d/GO/MF_bar.png)	
+#![](`r paste0(snakemake@scriptdir, "/results/120d/GO/MF_bar.png")`)
+
+
+#grid::rasterGrob(png::readPNG(paste0(snakemake@scriptdir, "/../results/", exp, "/GO/MF_bar.png)")))
+
+library(magick)
+library(cowplot)
+ggdraw() + draw_image(paste0(snakemake@scriptdir, "/../results/", exp, "/GO/MF_bar.png)"))
+```
 
 
 

@@ -3,7 +3,7 @@ Data/
 reads/
 QC/
 salmon/
-deseq/
+results/
 .snakemake/
 report.html
 logs/*

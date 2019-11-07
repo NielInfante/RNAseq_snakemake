@@ -3,11 +3,10 @@ channels:
   - bioconda
   - conda-forge
 dependencies:
-- r = 3.6
-- r-tidyverse = 1.2.1
-- r-biocmanager = 1.30.4
-- bioconductor-annotationdbi = 1.48.0
-- bioconductor-gage = 2.36
-- bioconductor-gagedata = 2.23
-- bioconductor-biomart = 2.42
-- bioconductor-org.hs.eg.db = 3.10
+  - r = 3.6
+  - r-tidyverse = 1.2.1
+  - r-biocmanager = 1.30.4
+  - bioconductor-clusterprofiler = 3.14
+  - bioconductor-annotationdbi = 1.48.0
+  - bioconductor-org.hs.eg.db = 3.10
+  - bioconductor-org.mm.eg.db = 3.10

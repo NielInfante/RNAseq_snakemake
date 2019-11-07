@@ -33,11 +33,12 @@ tx2gene <- read_tsv(snakemake@input[['id']])
 exp <- snakemake@params$exp
 
 # This sources the config file the previous rule created
-snakemake@source(paste0('../deseq/', exp, '/config.R'))
+#snakemake@source(paste0('../experiements/', exp, '/deseq/', 'config.R'))
+source(paste0('results/', exp, '/deseq/config.R'))
 
 
 # script runs in .snakemake/scripts
-outDir <- "deseq"
+outDir <- paste0("results/", exp, "/deseq/")
 
 files <- paste0('salmon/', samples, '/quant.sf')
 
@@ -65,7 +66,7 @@ dds <- dds[keep,] # filter them out
 dds <- DESeq(dds)
 
 # Save dds
-saveRDS(dds, paste0(outDir, '/', outPrefix, '/dds.rds'))
+saveRDS(dds, paste0(outDir, 'dds.rds'))
 
 
 # Get results and extra data
@@ -135,15 +136,15 @@ outMax <- max(res[res$Cluster == 'Out',]$meanTPM)
 cut_value <- log2(mean(inMin, outMax) + 1)
 
 # write out cutoff so I can use it in report
-write.table(data.frame(CV=c(cut_value), MY=c(maxY)), file=paste(outDir, "/", outPrefix, "/basemean_cutoff.txt", sep=""), sep="\t", quote=F, row.names=F)
+write.table(data.frame(CV=c(cut_value), MY=c(maxY)), file=paste(outDir, "basemean_cutoff.txt", sep=""), sep="\t", quote=F, row.names=F)
 
 
 
 # Write Results
 outResults <- data.frame(GeneID=res$GeneID, Gene=res$GeneName, baseMean=res$baseMean, stat=res$stat, log2FoldChange=res$log2FoldChange, pvalue=res$pvalue, padj=res$padj)
 res <- res %>% select(GeneID, GeneName, everything())
-name <- paste(outDir, '/', outPrefix, '/results.txt', sep="") 
-write.table(res, file=name, sep="\t", quote=F, row.names=F)
+name <- paste0(outDir, 'results.txt') 
+write_tsv(res, name)
 
 
 
@@ -153,13 +154,13 @@ resSig <- resSig[ resSig$padj < 0.05, ] # Keep adjusted p less than 0.05
 resSig <- resSig %>% filter(Cluster == 'In') # Keep only the second cluster
 resSig <- resSig[abs(resSig$log2FoldChange) > 0.585, ] # Kep genes with a fold change of at least 1.5
 	
-write.table(resSig,file=paste(outDir, "/", outPrefix, "/significant.txt", sep=""), sep="\t", quote=F, row.names=F)
+write_tsv(resSig, paste0(outDir, "significant.txt"))
 
 
 
 ##########  Sanity Check
 # Plot counts of most significant, to check if fold change is right
-png(paste0(outDir, '/',outPrefix,'/sanity.check.png'))
+png(paste0(outDir, 'sanity.check.png'))
 title=paste(res[1,]$GeneName, "\nFold Change:",res[1,]$log2FoldChange)
 plotCounts(dds, gene=res[1,]$GeneID, intgroup = PCA_Group, main=res[1,]$GeneName, 
 					 sub=paste('FC:', format(res[1,]$log2FoldChange, digits=2)), pch=19)

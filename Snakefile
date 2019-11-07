@@ -34,7 +34,7 @@ rule all:
     input:
         expand("QC/FastQC/{sample_file}_fastqc.zip", sample_file=fastqFiles.values()),       #FastQC output
         expand("salmon/{sample}/quant.sf", sample=config["samples"]),               # salmon quantification
-        expand("deseq/{experiment}/report.html", experiment=config["experiments"]),  # DESeq reports
+        expand("results/{experiment}/report.html", experiment=config["experiments"]),  # DESeq reports
         "QC/report.html"
 
 
@@ -136,8 +136,7 @@ rule create_config_for_deseq:
     input:
 #        "envs/R_initialized"      # Only include if we really want to initialize
     output:
-#        temp("deseq/{experiment}/config.R")
-        file="deseq/{experiment}/config.R"
+        file="results/{experiment}/deseq/config.R"
     run:
         exp=output[0].split("/")[1]
         print(exp)
@@ -159,12 +158,12 @@ rule create_config_for_deseq:
 
 rule do_deseq:
     input:
-        lambda wildcards: f"deseq/{wildcards.experiment}/config.R",
+        lambda wildcards: f"results/{wildcards.experiment}/deseq/config.R",
         expand("salmon/{sample}/quant.sf", sample=config['samples']),
         id="Data/IDs"
     output:
-        "deseq/{experiment}/dds.rds",
-        "deseq/{experiment}/results.txt"
+        "results/{experiment}/deseq/dds.rds",
+        "results/{experiment}/deseq/results.txt"
     params:
         exp = lambda wildcards: f"{wildcards.experiment}"
     log:
@@ -175,12 +174,29 @@ rule do_deseq:
 #        "Rscript scripts/doDESeq.R {params.exp} {config[metadata_file]} {config[tx2gene]}"
     script:
         "scripts/doDESeq.R"
-
-rule deseq_report:
+        
+        
+rule do_GO:
     input:
-        lambda wildcards: f"deseq/{wildcards.experiment}/dds.rds"
+        lambda wildcards: f"results/{wildcards.experiment}/deseq/dds.rds"
     output:
-        "deseq/{experiment}/report.html"
+        "results/{experiment}/GO/BP_results.txt",
+    params:
+        exp = lambda wildcards: f"{wildcards.experiment}"
+    log:
+        "logs/R_GO_{experiment}.log"
+    conda:
+        "envs/rnaseq_GO.yaml"
+    script:
+        "scripts/do_GO.R"
+        
+
+rule create_report:
+    input:
+#        lambda wildcards: f"results/{wildcards.experiment}/deseq/dds.rds"
+        lambda wildcards: f"results/{wildcards.experiment}/GO/BP_results.txt"
+    output:
+        "results/{experiment}/report.html"
     params:
         exp = lambda wildcards: f"{wildcards.experiment}"
     log:
