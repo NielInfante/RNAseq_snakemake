@@ -15,9 +15,6 @@ dependencies:
   - r-knitr = 1.25
   - r-dt = 0.9
   - r-kableextra = 1.1.0
-  - r-png = 0.1_7
-  - r-cowplot = 1.0
-  - r-magick = 2.2
 
 
 #  - texlive-core = 20180414

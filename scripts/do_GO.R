@@ -61,10 +61,10 @@ myGoFunc <- function(geneList, ontology){
 	ggsave(p, filename=paste0(outDir, ontology, '_GO_graph.png' ))
 	
 	p <- barplot(ego_s, showCategory = 40)
-	ggsave(p, filename=paste0(outDir, ontology, '_bar.png' ))
+	ggsave(p, filename=paste0(outDir, ontology, '_bar.png' ), height=5, width=10)
 	
 	p <- dotplot(ego_s)
-	ggsave(p, filename=paste0(outDir, ontology, '_dot.png' ))
+	ggsave(p, filename=paste0(outDir, ontology, '_dot.png' ), height=5, width=10)
 	
 	p <- cnetplot(ego_s)
 	ggsave(p, filename=paste0(outDir, ontology, '_concept.png' ))
