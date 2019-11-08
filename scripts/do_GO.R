@@ -25,6 +25,8 @@ sig <- read_tsv(paste0('results/', exp, '/deseq/significant.txt'))
 if (dim(sig)[1] == 0){
 	d <- tibble(no_genes = character())
 	write_tsv(d,  paste0(outDir, 'BP_results.txt'))	
+	write_tsv(d,  paste0(outDir, 'MF_results.txt'))	
+	write_tsv(d,  paste0(outDir, 'CC_results.txt'))	
 	return()
 }
 
