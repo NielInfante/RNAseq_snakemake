@@ -34,7 +34,7 @@ rule all:
     input:
         expand("QC/FastQC/{sample_file}_fastqc.zip", sample_file=fastqFiles.values()),       #FastQC output
         expand("salmon/{sample}/quant.sf", sample=config["samples"]),               # salmon quantification
-        expand("deseq/{experiment}/report.html", experiment=config["experiments"]),  # DESeq reports
+        expand("results/{experiment}/report.html", experiment=config["experiments"]),  # DESeq reports
         "QC/report.html"
 
 
@@ -49,6 +49,8 @@ rule fastqc:
 #        "QC/FastQC/{fastqFiles[sample_file]}_fastqc.zip"
         "QC/FastQC/{sample_file}_fastqc.zip"
     threads: 16
+    conda:
+        "envs/rnaseq_QC.yaml"
     shell:
         "fastqc -t {threads} {input} -o QC/FastQC"
 #        "cat {input} | fastqc -t {threads} stdin:{sample_file} -o QC/FastQC"
@@ -61,6 +63,8 @@ rule multiQC:
         expand("salmon/{sample}/quant.sf", sample=config["samples"])           # salmon quantification
     output:
         "QC/report.html"
+    conda:
+        "envs/rnaseq_QC.yaml"
     shell:
         "multiqc -f -n {output} QC/FastQC salmon"
 
@@ -70,6 +74,8 @@ rule salmon_build_index:
         ref=f"{config['reference_base']}.fa"
     output:
         directory(f"{config['reference_base']}")
+    conda:
+        "envs/rnaseq_salmon.yaml"
     shell:
         "salmon index -t {input.ref} -i {output} --type quasi -k 31"
 
@@ -90,6 +96,8 @@ rule salmon_quantification:
         #zip_ext = bz2 # req'd for bz2 files ('bz2'); optional for gz files('gz')
         extra=f"--gcBias --validateMappings --numBootstraps {config['salmon_bootstraps']}"
     threads: 16
+    conda:
+        "envs/rnaseq_salmon.yaml"
     wrapper:
         "0.38.0/bio/salmon/quant"
 
@@ -105,7 +113,8 @@ rule parseTranscripts:
         "perl scripts/parseFasta.pl {input.ref} {output.ID} {output.bio}"
 
 # Rule to install packages.
-# This shold only have to run once.
+# This should only have to run once.
+# Actually, shouldn't need this at all switching to --use-conda
 rule init_R:
     output:
         "envs/R_initialized"
@@ -127,8 +136,7 @@ rule create_config_for_deseq:
     input:
 #        "envs/R_initialized"      # Only include if we really want to initialize
     output:
-#        temp("deseq/{experiment}/config.R")
-        file="deseq/{experiment}/config.R"
+        file="results/{experiment}/deseq/config.R"
     run:
         exp=output[0].split("/")[1]
         print(exp)
@@ -150,33 +158,51 @@ rule create_config_for_deseq:
 
 rule do_deseq:
     input:
-        lambda wildcards: f"deseq/{wildcards.experiment}/config.R",
+        lambda wildcards: f"results/{wildcards.experiment}/deseq/config.R",
         expand("salmon/{sample}/quant.sf", sample=config['samples']),
         id="Data/IDs"
     output:
-        "deseq/{experiment}/dds.rds",
-        "deseq/{experiment}/results.txt"
+        "results/{experiment}/deseq/dds.rds",
+        "results/{experiment}/deseq/results.txt"
     params:
         exp = lambda wildcards: f"{wildcards.experiment}"
     log:
         "logs/R_deseq_{experiment}.log"
     conda:
-#        "envs/forRMD.yaml"
-        "envs/minimal_R.yaml"
+        "envs/rnaseq_deseq.yaml"
 #    shell:
 #        "Rscript scripts/doDESeq.R {params.exp} {config[metadata_file]} {config[tx2gene]}"
     script:
         "scripts/doDESeq.R"
-
-rule deseq_report:
+        
+        
+rule do_GO:
     input:
-        lambda wildcards: f"deseq/{wildcards.experiment}/dds.rds"
+        lambda wildcards: f"results/{wildcards.experiment}/deseq/dds.rds"
     output:
-        "deseq/{experiment}/report.html"
+        "results/{experiment}/GO/BP_results.txt",
+    params:
+        exp = lambda wildcards: f"{wildcards.experiment}"
+    log:
+        "logs/R_GO_{experiment}.log"
+    conda:
+        "envs/rnaseq_GO.yaml"
+    script:
+        "scripts/do_GO.R"
+        
+
+rule create_report:
+    input:
+#        lambda wildcards: f"results/{wildcards.experiment}/deseq/dds.rds"
+        lambda wildcards: f"results/{wildcards.experiment}/GO/BP_results.txt"
+    output:
+        "results/{experiment}/report.html"
     params:
         exp = lambda wildcards: f"{wildcards.experiment}"
     log:
         "logs/R_report_{experiment}.log"
+    conda:
+        "envs/forRMD.yaml"
     script:
         "scripts/create_reports.Rmd"
 

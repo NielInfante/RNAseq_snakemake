@@ -23,6 +23,9 @@ input_file_suffix: .fq.gz
 reference_base: Data/hg38_rna
 salmon_bootstraps: 3
 
+# Note: organism_db also needs to be added to rnaseq_GO.yaml in envs
+organism_db: org.Hs.eg.db
+
 # Differential Analysis
 metadata_file: meta.txt
 sample_column: Sample

@@ -8,10 +8,14 @@ dependencies:
   - r-tidyverse = 1.2.1
   - r-biocmanager = 1.30.4
   - bioconductor-deseq2 = 1.24.0
-  - bioconductor-tximport = 1.12.3
-  - bioconductor-annotationdbi = 1.46.0
   - r-rcolorbrewer = 1.1_2
   - r-ggrepel = 0.8.1
   - r-gplots = 3.0.1.1
-  - texlive-core = 20180414
-  - pandoc = 2.7.3
+  - r-pheatmap = 1.0.12
+  - r-knitr = 1.25
+  - r-dt = 0.9
+  - r-kableextra = 1.1.0
+
+
+#  - texlive-core = 20180414
+#  - pandoc = 2.7.3

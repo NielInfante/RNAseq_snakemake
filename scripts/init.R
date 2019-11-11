@@ -4,32 +4,24 @@ sink(log)
 sink(log, type="message")
 
 
+# This allows me to install an R package that is 
+# specified in the config.yaml file.
+# This way, the user doesn't have to edit the environment files.
+# Also, this script should run only once, and not try to install the
+# same package multiple times.
 
-organism <- snakemake@config$organism
+organism_db <- snakemake@config$organism_db
 
 #str(snakemake)
 
-# Pass organism ID in
 
-args <- commandArgs()
+if (!require(organism_db, quietly = TRUE))
+  BiocManager::install(organism_db, update=F)
 
-
-if (!require(organism, quietly = TRUE))
-  BiocManager::install(organism, update=F)
-
-
-install.packages('tidyverse', repos='http://cran.us.r-project.org')
-
-#require(devtools)
-#install_version("ggplot2", version = "0.9.1", repos = "http://cran.us.r-project.org")
-
-#install.packages('RColorBrewer', repos='http://cran.us.r-project.org')
-#install.packages('ggrepel', repos='http://cran.us.r-project.org')
-#install.packages('gplots', repos='http://cran.us.r-project.org')
+# check if it installed
+library(organism_db, character.only = T)
 
 
-
-
-
+# Indicator to say the script ran, and snakemake doesn't call it again.
 x <- '1'
 write.table(x, file="envs/R_initialized")
