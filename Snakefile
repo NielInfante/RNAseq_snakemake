@@ -191,10 +191,26 @@ rule do_GO:
         "scripts/do_GO.R"
         
 
+rule do_KEGG:
+    input:
+        lambda wildcards: f"results/{wildcards.experiment}/deseq/dds.rds"
+    output:
+        "results/{experiment}/KEGG/KEGG_results.txt",
+    params:
+        exp = lambda wildcards: f"{wildcards.experiment}"
+    log:
+        "logs/R_KEGG_{experiment}.log"
+    conda:
+        "envs/rnaseq_GO.yaml"
+    script:
+        "scripts/KEGG.R"
+        
+
 rule create_report:
     input:
-#        lambda wildcards: f"results/{wildcards.experiment}/deseq/dds.rds"
-        lambda wildcards: f"results/{wildcards.experiment}/GO/BP_results.txt"
+        lambda wildcards: f"results/{wildcards.experiment}/deseq/dds.rds",
+        lambda wildcards: f"results/{wildcards.experiment}/GO/BP_results.txt",
+        lambda wildcards: f"results/{wildcards.experiment}/KEGG/KEGG_results.txt"
     output:
         "results/{experiment}/report.html"
     params:

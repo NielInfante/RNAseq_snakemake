@@ -25,6 +25,7 @@ salmon_bootstraps: 3
 
 # Note: organism_db also needs to be added to rnaseq_GO.yaml in envs
 organism_db: org.Hs.eg.db
+kegg_db: hsa
 
 # Differential Analysis
 metadata_file: meta.txt

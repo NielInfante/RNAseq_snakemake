@@ -35,6 +35,11 @@ input_file_suffix: .fq.gz
 
 reference_base: Data/hg38_rna
 salmon_bootstraps: 30
+
+# Note: organism_db also needs to be added to rnaseq_GO.yaml in envs
+organism_db: org.Hs.eg.db
+kegg_db: hsa
+
 metadata_file: meta.txt
 sample_column: Sample
 
@@ -63,6 +68,12 @@ Note the spacing is important to get the indent levels correct. Also note that y
 The reference base should be in the Data folder, it should be a fasta file with all the transcripts you wish to consider. It should have a suffix of .fa.
 
 salmon_bootstraps gives how many bootstraps perform.
+
+AnnotationDBI organism db,
+prebuilt list is [here](http://bioconductor.org/packages/release/BiocViews.html#___OrgDb)
+Additional resources are at [AnnotationHub](https://bioconductor.org/packages/release/bioc/html/AnnotationHub.html), or build your own using [AnnotationForge](https://bioconductor.org/packages/release/bioc/html/AnnotationForge.html)
+Kegg IDs can be found [here](https://www.genome.jp/kegg/catalog/org_list.html)
+
 
 The metadata file should be tab delimited. There should be a column that matches the sample names listed in the config file; specify this with the sample_column parameter.
 
