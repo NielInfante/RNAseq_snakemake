@@ -74,7 +74,6 @@ kegg_gsea <- gseKEGG(geneList = geneList, keyType='ncbi-geneid',organism=kegg_db
 										 minGSSize=120, pvalueCutoff=0.05, verbose=F)
 
 
-
 kegg_res <- kegg_gsea@result
 
 write_tsv(kegg_res, paste0(outDir, 'KEGG_GSEA_results.txt'))
@@ -95,12 +94,20 @@ setwd(outDir)
 # Loop through each significant pathway
 for (idx in 1:nrow(kegg_res)){
 	
-	pathview(gene.data=geneList, pathway.id=kegg_res$ID, species=kegg_db,
-					 limit=list(gene=max(abs(geneList)), cpd=1),
-					 out.suffix='kegg_gsea')
+	# This will error for some pathways, so wrap it in try catch
+	tmp <- tryCatch(
+		expr = {
+			pathview(gene.data=geneList, pathway.id=kegg_res$ID[idx], species=kegg_db,
+						 limit=list(gene=max(abs(geneList)), cpd=1),
+						 out.suffix='kegg_gsea')
+		},
+		error=function(e){
+			print(paste("Pathview error:",e,"\nHappened with pathway", kegg_res$ID[idx]))
+		}
+	)
 
-	p <- enrichplot::gseaplot2(kegg_res, geneSetID = idx,  title = kegg_res$Description[idx])
-	ggsave(p, file=paste('kegg_gsea_', kegg_res$ID, '_running.png'))
+	p <- enrichplot::gseaplot2(kegg_gsea, geneSetID = kegg_res$ID[idx],  title = kegg_res$Description[idx])
+	ggsave(p, filename=paste0('kegg_gsea_', kegg_res$ID[idx], '_running.png'))
 	
 }
 
