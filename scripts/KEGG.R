@@ -91,8 +91,17 @@ names(geneList) <- genes$ENTREZID
 # Need to be in output directory, as pathview automatically writes figures to working directory.
 setwd(outDir)
 
+
+# Get genes in each pathway
+path_list  <- KEGGREST::keggLink("pathway", kegg_db) %>% 
+	tibble(pathway = ., ENTREZID = sub(paste0(kegg_db, ":"), "", names(.)))
+
+path_list <- path_list %>% mutate(pathway=substr(pathway, 6, 99999))
+
+
 # Loop through each significant pathway
 for (idx in 1:nrow(kegg_res)){
+	print(paste("Doing num", idx))
 	
 	# This will error for some pathways, so wrap it in try catch
 	tmp <- tryCatch(
@@ -108,8 +117,24 @@ for (idx in 1:nrow(kegg_res)){
 
 	p <- enrichplot::gseaplot2(kegg_gsea, geneSetID = kegg_res$ID[idx],  title = kegg_res$Description[idx])
 	ggsave(p, filename=paste0('kegg_gsea_', kegg_res$ID[idx], '_running.png'))
+
+	
+	pg <- path_list %>% filter(pathway == kegg_res$ID[idx])
+	pathway.genes <- genes %>% filter(ENTREZID %in% pg$ENTREZID)
+	
+#	print(paste("pathway has", dim(pathway.genes)[1], "rows, with", names(pathway.genes)))	
+	p <- ggplot(pathway.genes, aes(GeneName, log2FoldChange)) +
+		geom_col(aes(fill=padj<0.05)) +
+		coord_flip() + 
+		labs(x="Gene", y="Log 2 Fold Change", title=kegg_res$Description[idx], fill="Significant") + 
+		theme_minimal() + scale_fill_manual(values=c('grey','red'))
+	ggsave(p, filename=paste0("bar_", kegg_res$ID[idx], ".png"))
+		
 	
 }
+
+
+
 
 
 

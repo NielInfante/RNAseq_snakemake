@@ -475,7 +475,6 @@ datatable(res, filter='bottom', options = list(pageLength=10, lengthMenu = c(5, 
 
 
 ## KEGG GSEA Visualization
-## GO Analysis Cellular Components
 ```{r kegg_gsea_plot, out.width="95%", message=F, warning=F}
 res <- read_tsv(paste0("results/", exp, "/KEGG/KEGG_GSEA_results.txt"))
 
@@ -498,6 +497,19 @@ if(dim(res)[1] == 0){
 	print("No plot was created")
 } else {
 	include_graphics(paste0(snakemake@scriptdir, "/../results/", exp, "/KEGG/kegg_gsea_",res$ID[1], '_running.png'))
+}
+
+
+```
+
+## KEGG GSEA Another Visualization
+```{r kegg_gsea_plot_3, out.width="95%", message=F, warning=F}
+res <- read_tsv(paste0("results/", exp, "/KEGG/KEGG_GSEA_results.txt"))
+
+if(dim(res)[1] == 0){
+	print("No plot was created")
+} else {
+	include_graphics(paste0(snakemake@scriptdir, "/../results/", exp, "/KEGG/bar_",res$ID[1], '.png'))
 }
 
 
