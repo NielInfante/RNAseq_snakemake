@@ -180,7 +180,7 @@ rule do_GO:
     input:
         lambda wildcards: f"results/{wildcards.experiment}/deseq/dds.rds"
     output:
-        "results/{experiment}/GO/BP_results.txt",
+        "results/{experiment}/GO/all_genes_BP_results.txt",
     params:
         exp = lambda wildcards: f"{wildcards.experiment}"
     log:
@@ -209,7 +209,7 @@ rule do_KEGG:
 rule create_report:
     input:
         lambda wildcards: f"results/{wildcards.experiment}/deseq/dds.rds",
-        lambda wildcards: f"results/{wildcards.experiment}/GO/BP_results.txt",
+        lambda wildcards: f"results/{wildcards.experiment}/GO/all_genes_BP_results.txt",
         lambda wildcards: f"results/{wildcards.experiment}/KEGG/KEGG_results.txt"
     output:
         "results/{experiment}/report.html"

@@ -1,0 +1,56 @@
+
+## GO Analysis Molecular Function
+Significantly up regulated genes
+
+```{r go_mf_table, message=F, warning=F}
+res <- read_tsv(paste0(snakemake@scriptdir, "/../results/", exp, "/GO/all_up_genes_MF_results.txt"))
+
+if(dim(res)[1] == 0){
+	print("No significant ontological terms were found for molecular function")
+} else {
+	res <- res %>% select(ID, Description, GeneRatio, BgRatio, p.adjust)
+	datatable(res, filter='bottom', options = list(pageLength=10, lengthMenu = c(5, 10, 25), scrollX=T)) %>% 
+		formatRound('p.adjust', 3)
+	#	formatRound('baseMean', 0)
+	
+}
+
+```
+
+
+## GO Analysis Molecular Function
+Significantly up regulated genes
+
+```{r go_mf_plot, out.width="90%", message=F, warning=F}
+
+res <- read_tsv(paste0(snakemake@scriptdir, "/../results/", exp, "/GO/all_up_genes_MF_results.txt"))
+
+if(dim(res)[1] == 0){
+	cat("No plot was created for molecular function")
+} else {
+	include_graphics(paste0(snakemake@scriptdir, "/../results/", exp, "/GO/MF_bar.png"))
+}
+```
+
+
+
+## GO Analysis Biological Processes
+Significantly down regulated genes
+
+```{r go_bp_table, message=F, warning=F}
+res <- read_tsv(paste0(snakemake@scriptdir, "/../results/", exp, "/GO/all_down_genes_BP_results.txt"))
+
+if(dim(res)[1] == 0){
+	print("No significant ontological terms were found for Biological Processes")
+} else {
+	res <- res %>% select(ID, Description, GeneRatio, BgRatio, p.adjust)
+	datatable(res, filter='bottom', options = list(pageLength=10, lengthMenu = c(5, 10, 25), scrollX=T)) %>% 
+		formatRound('p.adjust', 3)
+	#	formatRound('baseMean', 0)
+	
+}
+
+```
+
+
+

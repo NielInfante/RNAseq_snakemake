@@ -1,0 +1,52 @@
+---
+title: "Test.rmd"
+author: "Niel Infante"
+date: "12/2/2019"
+output: slidy_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## R Markdown
+
+This is an R Markdown presentation. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
+
+## Slide with Bullets
+
+- Bullet 1
+- Bullet 2
+- Bullet 3
+
+```{r, result='asis'}
+#cat(knitr::knit_child('Test_child.rmd', quiet=T))
+
+#cat(knitr::asis_output(knitr::knit_child("Test_child.rmd", quiet=TRUE)))
+
+#cat(knitr::knit_child("child.Rmd", quiet=TRUE, envir=environment()))
+
+```
+
+## Slide with R Output
+
+```{r cars, echo = TRUE}
+summary(cars)
+
+doChild <- T
+childVar <- 'Hey, its me'
+
+```
+
+```{r testing, child=if(doChild) 'Test_child.rmd' else 'empty.rmd'}
+
+```
+
+## Slide with Plot
+
+```{r pressure}
+plot(pressure)
+```
+
