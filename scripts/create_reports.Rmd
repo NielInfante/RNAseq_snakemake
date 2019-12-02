@@ -348,7 +348,7 @@ pheatmap(mat, cutree_rows = 2, cutree_cols = 2, annotation_col = df, angle_col =
 
 Heatmap shows the 15 most upregulated, and 15 most downregulated genes. Color indicates how much the expression of the gene inthe samples is different from the mean expression of that gene.
 
-
+<!--- Include all the GO analysis -->
 ```{r GO, child='../../scripts/GO_report.rmd'}
 
 ```
