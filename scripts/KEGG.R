@@ -45,6 +45,10 @@ kegg_res <- filter(kegg_res, p.adjust < 0.05)
 
 write_tsv(kegg_res, paste0(outDir, 'KEGG_results.txt'))
 
+p <- dotplot(kegg_over)
+ggsave(p, filename=paste0(outDir, "over_overview_dot.png"))
+p <- barplot(kegg_over)
+ggsave(p, filename=paste0(outDir, "over_overview_bar.png"))
 
 # GSEA
 
@@ -60,21 +64,21 @@ genes <- na.omit(genes)
 #genes <- genes %>% arrange(desc(abs(log2FoldChange)))
 #genes <- genes %>% arrange(desc(log2FoldChange))
 #genes <- genes %>% arrange(desc(abs(stat)))
-#genes <- genes %>% arrange(desc(stat))
-genes <- genes %>% arrange(desc(-1*log10(padj)))
-geneList <- -1 * log10(genes$padj)
+genes <- genes %>% arrange(desc(stat))
+geneList <- genes$stat
+#genes <- genes %>% arrange(desc(-1*log10(padj)))
+#geneList <- -1 * log10(genes$padj)
 #geneList <- abs(genes$log2FoldChange)
 #geneList <- genes$log2FoldChange
 #geneList <- abs(genes$stat)
-#geneList <- genes$stat
 
 names(geneList) <- genes$ENTREZID
 
 kegg_gsea <- gseKEGG(geneList = geneList, keyType='ncbi-geneid',organism=kegg_db, nPerm=1000, 
-										 minGSSize=120, pvalueCutoff=0.05, verbose=F)
+										 minGSSize=50, pvalueCutoff=0.05, verbose=F)
 
 
-kegg_res <- kegg_gsea@result
+kegg_res <- as_tibble(kegg_gsea@result)
 
 write_tsv(kegg_res, paste0(outDir, 'KEGG_GSEA_results.txt'))
 
@@ -84,6 +88,27 @@ if (nrow(kegg_res) == 0){
 	return
 }
 
+# Overview Plots
+#kegg_res <- kegg_res %>% mutate(GeneRatio = str_extract(leading_edge, "[0-9]+"))
+kegg_res <- kegg_res %>% mutate(GeneRatio = ( (1 + str_count(core_enrichment,"/")) / setSize))
+kegg_res$Description <- as.factor(kegg_res$Description)
+kegg_res <- kegg_res %>%  arrange(GeneRatio)
+p <- ggplot(kegg_res, aes(x=GeneRatio, y= fct_reorder(Description, GeneRatio))) + 
+	geom_point(aes(color=p.adjust, size=setSize)) +
+	labs(y="", x="Ratio of Significant Genes", title='KEGG Pathways', color="p value", size="Genes in\nPathway") +
+	theme_minimal()
+ggsave(p, filename=paste0(outDir, "gsea_overview_ratio.png"))
+
+p <- ggplot(kegg_res, aes(reorder(Description, NES), NES)) +
+	geom_col() +
+	coord_flip() +
+	labs(x="", y="Normalized Enrichment Score",
+			 title="KEGG Pathways") + 
+	theme_minimal()
+ggsave(p, filename=paste0(outDir, "gsea_overview_nes.png"))
+
+
+# Pathway level plots
 # Don't want absolute FC for figure
 geneList <- genes$log2FoldChange
 names(geneList) <- genes$ENTREZID

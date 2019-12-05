@@ -50,7 +50,7 @@ universe <- univ$ENTREZID
 
 myGoFunc <- function(geneList, prefix, ontology){
 	
-	ego <- enrichGO(gene        = geneList,
+	ego <- enrichGO(gene          = geneList,
 									universe      = universe,
 									OrgDb         = orgDB,
 									ont           = ontology,

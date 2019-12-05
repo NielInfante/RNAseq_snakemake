@@ -1,3 +1,7 @@
+## Gene Ontology
+
+Gene ontology analysis was done on genes found to be significantly differentially expressed. The GO analysis was done separately for significantly up regulated genes, significantly down regulated genes, and all significant genes. The background in all cases is genes with enough expression to make it past the initial filters. The analysis was done for Molecular Function, Biological Process, and Cellular Component. Tables and figures were created for all of these analyses, and are available in the GO sub folder. Below are some selected outputs.
+
 ## GO Analysis Molecular Function
 Significantly up regulated genes
 

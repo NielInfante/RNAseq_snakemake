@@ -64,40 +64,13 @@ max_y <- cv$MY[1]
 
 ## Table of Contents
 <UL>
-	<LI>Differential Expression Results Table
-	<UL>
-		<LI><a href="#(3)">Table</a>
-		<LI><a href="#(4)">Explanation of Columns</a>
-		<LI><a href="#(5)">Fold Change Visualization</a>
-		<LI><a href="#(6)">Expression Cutoff</a>
-		<LI><a href="#(7)">Significant Genes</a>
-	</UL>
-</UL>
-<UL>
-	<LI>Visualizations of Differential Expression
-	<UL>
-		<LI><a href="#(8)">MA Plot</a>
-		<LI><a href="#(9)">Cluster</a>
-		<LI><a href="#(10)">PCA</a>
-		<LI><a href="#(11)">PCA with names</a>
-		<LI><a href="#(12)">Volcano</a>
-		<LI><a href="#(13)">Expression Heatmap</a>
-	</UL>
-</UL>	
-<UL>
-	<LI>Gene Ontology
-	<UL>
-		<LI><a href="#(14)">Molecular Function</a>
-		<LI><a href="#(15)">Molecular Function Bar Plot</a>
-		<LI><a href="#(16)">Biological Processes</a>
-		<LI><a href="#(17)">Biological Processes Dot Plot</a>
-		<LI><a href="#(18)">Cellular Components</a>
-		<LI><a href="#(19)">Cellular Components GO Graph</a>
-	</UL>
+	<LI><a href="#(3)">Differential Expression Results</a>
+	<LI><a href="#(8)">Visualizations of Differential Expression</a>
+	<LI><a href=#(14)>Gene Ontology</a>
+	<LI><a href=#(21)>KEGG Pathways</a>
 </UL>
 
 ## Results
-
 This is the format of the results table, only 500 out of `r dim(res)[1]` genes are shown. The full list, with more columns, is available in the file results.txt.
 ```{r results}
 
@@ -230,7 +203,6 @@ datatable(tableToShow, filter='bottom', options = list(pageLength=10, lengthMenu
 
 
 ## MA Plot
-
 ```{r maplot}
 plotMA(dds)
 ```
@@ -346,10 +318,15 @@ pheatmap(mat, cutree_rows = 2, cutree_cols = 2, annotation_col = df, angle_col =
 
 ```
 
-Heatmap shows the 15 most upregulated, and 15 most downregulated genes. Color indicates how much the expression of the gene inthe samples is different from the mean expression of that gene.
+Heatmap shows the 15 most upregulated, and 15 most downregulated genes. Color indicates how much the expression of the gene in the samples is different from the mean expression of that gene.
 
 <!--- Include all the GO analysis -->
 ```{r GO, child='../../scripts/GO_report.rmd'}
+
+```
+
+<!--- Include all the KEGG analysis -->
+```{r KEGG, child='../../scripts/KEGG_report.rmd'}
 
 ```
 
