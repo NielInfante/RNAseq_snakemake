@@ -61,7 +61,7 @@ myGoFunc <- function(geneList, prefix, ontology){
 	
 	
 
-	if(is.null(ego)) {
+	if(is.null(ego) | dim(as.data.frame(ego))[1] == 0) {
 		write_tsv(tibble(no_genes = character()), paste0(outDir, prefix, ontology, '_results.txt'))
 		return()
 	} else {

@@ -148,7 +148,7 @@ for (idx in 1:nrow(kegg_res)){
 	pathway.genes <- genes %>% filter(ENTREZID %in% pg$ENTREZID)
 	
 #	print(paste("pathway has", dim(pathway.genes)[1], "rows, with", names(pathway.genes)))	
-	p <- ggplot(pathway.genes, aes(GeneName, log2FoldChange)) +
+	p <- ggplot(pathway.genes, aes(fct_reorder(GeneName, log2FoldChange), log2FoldChange)) +
 		geom_col(aes(fill=padj<0.05)) +
 		coord_flip() + 
 		labs(x="Gene", y="Log 2 Fold Change", title=kegg_res$Description[idx], fill="Significant") + 

@@ -17,7 +17,7 @@ datatable(res, filter='bottom', options = list(pageLength=10, lengthMenu = c(5, 
 ## KEGG Overrepresentaion Analysis
 KEGG Pathways in which significant genes are overrepresented.
 
-```{r kegg_over_plot,  out.width="95%", message=F, warning=F}
+```{r kegg_over_plot,  out.width="65%", message=F, warning=F}
 
 include_graphics(paste0(snakemake@scriptdir, "/../results/", exp, "/KEGG/over_overview_dot.png"))
 
@@ -40,14 +40,14 @@ datatable(res, filter='bottom', options = list(pageLength=10, lengthMenu = c(5, 
 
 ## KEGG GSEA Overview
 
-```{r kegg_gsea_over}
+```{r kegg_gsea_over, out.width="45%"}
 	include_graphics(c(paste0(snakemake@scriptdir, "/../results/", exp, "/KEGG/gsea_overview_ratio.png"),
 										 paste0(snakemake@scriptdir, "/../results/", exp, "/KEGG/gsea_overview_nes.png")))
 
 ```
 
 ## KEGG GSEA Visualization
-```{r kegg_gsea_plot, out.width="95%", message=F, warning=F}
+```{r kegg_gsea_plot, out.width="65%", message=F, warning=F}
 res <- read_tsv(paste0("results/", exp, "/KEGG/KEGG_GSEA_results.txt"))
 
 if(dim(res)[1] == 0){
@@ -62,7 +62,7 @@ if(dim(res)[1] == 0){
 
 
 ## KEGG GSEA Another Visualization
-```{r kegg_gsea_plot_2, out.width="95%", message=F, warning=F}
+```{r kegg_gsea_plot_2, out.width="40%", message=F, warning=F}
 res <- read_tsv(paste0("results/", exp, "/KEGG/KEGG_GSEA_results.txt"))
 
 if(dim(res)[1] == 0){
@@ -75,7 +75,7 @@ if(dim(res)[1] == 0){
 ```
 
 ## KEGG GSEA Another Visualization
-```{r kegg_gsea_plot_3, out.width="95%", message=F, warning=F}
+```{r kegg_gsea_plot_3, out.width="50%", message=F, warning=F}
 res <- read_tsv(paste0("results/", exp, "/KEGG/KEGG_GSEA_results.txt"))
 
 if(dim(res)[1] == 0){
