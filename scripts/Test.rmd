@@ -7,6 +7,8 @@ output: slidy_presentation
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+
+library(tidyverse)
 ```
 
 ## R Markdown
@@ -30,12 +32,51 @@ When you click the **Knit** button a document will be generated that includes bo
 
 ```
 
-## Slide with R Output
+## Slide with plotly Output
+```{r sankey, message=F, warning=F}
 
+library(plotly)
+
+p <- plot_ly(
+	type = "sankey",
+	orientation = "h",
+	
+	node = list(
+		label = c("A1", "A2", "B1", "B2", "C1", "C2"),
+		color = c("blue", "blue", "blue", "blue", "blue", "blue"),
+		pad = 15,
+		thickness = 20,
+		line = list(
+			color = "black",
+			width = 0.5
+		)
+	),
+	
+	link = list(
+		source = c(0,1,0,2,3,3),
+		target = c(2,3,3,4,4,5),
+		value =  c(8,4,2,8,4,2)
+	)
+) %>% 
+	layout(
+		title = "Basic Sankey Diagram",
+		font = list(
+			size = 10
+		)
+	)
+
+
+
+p
+
+```
+
+
+## Another 
 ```{r cars, echo = TRUE}
 summary(cars)
 
-doChild <- T
+doChild <- F
 childVar <- 'Hey, its me'
 
 ```

@@ -2,50 +2,120 @@
 
 Gene ontology analysis was done on genes found to be significantly differentially expressed. The GO analysis was done separately for significantly up regulated genes, significantly down regulated genes, and all significant genes. The background in all cases is genes with enough expression to make it past the initial filters. The analysis was done for Molecular Function, Biological Process, and Cellular Component. Tables and figures were created for all of these analyses, and are available in the GO sub folder. Below are some selected outputs.
 
+
+```{r go_steup, include=F}
+
+# See if there are any results for molecular function.
+# Try up first, then down, then all
+# set the appropriate table and picture
+showMF <- TRUE
+
+mf_res <- read_tsv(paste0(snakemake@scriptdir, "/../results/", exp, "/GO/all_up_genes_MF_results.txt"))
+mf_pic <- paste0(snakemake@scriptdir, "/../results/", exp, "/GO/all_up_genes_MF_bar.png")
+mf_message <- "Significantly up regulated genes"
+
+if(dim(mf_res)[1] == 0){
+	mf_ref <- read_tsv(paste0(snakemake@scriptdir, "/../results/", exp, "/GO/all_down_genes_MF_results.txt"))
+	mf_pic <- paste0(snakemake@scriptdir, "/../results/", exp, "/GO/all_down_genes_MF_bar.png")
+	mf_message <- "Significantly down regulated genes"
+
+	if(dim(mf_res)[1] == 0){
+		mf_res <- read_tsv(paste0(snakemake@scriptdir, "/../results/", exp, "/GO/all_genes_MF_results.txt"))
+		mf_pic <- paste0(snakemake@scriptdir, "/../results/", exp, "/GO/all_genes_MF_bar.png")
+		mf_message <- "All significant genes"
+
+		if(dim(mf_res)[1] == 0){
+			showMF <- FALSE
+			mf_message <- "No significant ontological terms were found for Molecular Function"
+		}
+	} 
+}
+
+
+# Same for BP
+showBP <- TRUE
+
+bp_res <- read_tsv(paste0(snakemake@scriptdir, "/../results/", exp, "/GO/all_up_genes_BP_results.txt"))
+bp_pic <- paste0(snakemake@scriptdir, "/../results/", exp, "/GO/all_up_genes_BP_dot.png")
+bp_message <- "Significantly up regulated genes"
+
+if(dim(bp_res)[1] == 0){
+	bp_ref <- read_tsv(paste0(snakemake@scriptdir, "/../results/", exp, "/GO/all_down_genes_BP_results.txt"))
+	bp_pic <- paste0(snakemake@scriptdir, "/../results/", exp, "/GO/all_down_genes_BP_dot.png")
+	bp_message <- "Significantly down regulated genes"
+
+	if(dim(bp_res)[1] == 0){
+		bp_res <- read_tsv(paste0(snakemake@scriptdir, "/../results/", exp, "/GO/all_genes_BP_results.txt"))
+		bp_pic <- paste0(snakemake@scriptdir, "/../results/", exp, "/GO/all_genes_BP_dot.png")
+		bp_message <- "All significant genes"
+
+		if(dim(bp_res)[1] == 0){
+			showBP <- FALSE
+			bp_message <- "No significant ontological terms were found for Biological Process"
+		}
+	}
+}
+
+# Same for CC
+showCC <- TRUE
+
+cc_res <- read_tsv(paste0(snakemake@scriptdir, "/../results/", exp, "/GO/all_up_genes_CC_results.txt"))
+cc_pic <- paste0(snakemake@scriptdir, "/../results/", exp, "/GO/all_up_genes_CC_GO_graph.png")
+cc_message <- "Significantly up regulated genes"
+
+if(dim(cc_res)[1] == 0){
+	cc_ref <- read_tsv(paste0(snakemake@scriptdir, "/../results/", exp, "/GO/all_down_genes_CC_results.txt"))
+	cc_pic <- paste0(snakemake@scriptdir, "/../results/", exp, "/GO/all_down_genes_CC_GO_graph.png")
+	cc_message <- "Significantly down regulated genes"
+
+	if(dim(cc_res)[1] == 0){
+		cc_res <- read_tsv(paste0(snakemake@scriptdir, "/../results/", exp, "/GO/all_genes_CC_results.txt"))
+		cc_pic <- paste0(snakemake@scriptdir, "/../results/", exp, "/GO/all_genes_CC_GO_graph.png")
+		cc_message <- "All significant genes"
+
+		if(dim(cc_res)[1] == 0){
+			showCC <- FALSE
+			cc_message <- "No significant ontological terms were found for Cellular Components"
+		}
+	}
+}
+
+
+
+
+```
 ## GO Analysis Molecular Function
-Significantly up regulated genes
+`r mf_message`
 
 ```{r go_mf_table, message=F, warning=F}
 res <- read_tsv(paste0(snakemake@scriptdir, "/../results/", exp, "/GO/all_up_genes_MF_results.txt"))
 
-if(dim(res)[1] == 0){
-	print("No significant ontological terms were found for molecular function")
-} else {
-	res <- res %>% select(ID, Description, GeneRatio, BgRatio, p.adjust)
-	datatable(res, filter='bottom', options = list(pageLength=10, lengthMenu = c(5, 10, 25), scrollX=T)) %>% 
+if(showMF){
+	mf_res <- mf_res %>% select(ID, Description, GeneRatio, BgRatio, p.adjust)
+	datatable(mf_res, filter='bottom', options = list(pageLength=10, lengthMenu = c(5, 10, 25), scrollX=T)) %>% 
 		formatRound('p.adjust', 3)
-	#	formatRound('baseMean', 0)
-	
-}
-
+} 
 ```
 
 ## GO Analysis Molecular Function
-Significantly up regulated genes
+`r mf_message`
 
 ```{r go_mf_plot, out.width="90%", message=F, warning=F}
 
-res <- read_tsv(paste0(snakemake@scriptdir, "/../results/", exp, "/GO/all_up_genes_MF_results.txt"))
-
-if(dim(res)[1] == 0){
-	print("No plot was created for molecular function")
-} else {
-	include_graphics(paste0(snakemake@scriptdir, "/../results/", exp, "/GO/all_up_genes_MF_bar.png"))
+if(showMF){
+	include_graphics(mf_pic)
 }
 ```
 
 
 ## GO Analysis Biological Processes
-Significantly down regulated genes
+`r bp_message`
 
 ```{r go_bp_table, message=F, warning=F}
-res <- read_tsv(paste0(snakemake@scriptdir, "/../results/", exp, "/GO/all_down_genes_BP_results.txt"))
 
-if(dim(res)[1] == 0){
-	print("No significant ontological terms were found for Biological Processes")
-} else {
-	res <- res %>% select(ID, Description, GeneRatio, BgRatio, p.adjust)
-	datatable(res, filter='bottom', options = list(pageLength=10, lengthMenu = c(5, 10, 25), scrollX=T)) %>% 
+if(showBP){
+	bp_res <- bp_res %>% select(ID, Description, GeneRatio, BgRatio, p.adjust)
+	datatable(bp_res, filter='bottom', options = list(pageLength=10, lengthMenu = c(5, 10, 25), scrollX=T)) %>% 
 		formatRound('p.adjust', 3)
 	#	formatRound('baseMean', 0)
 	
@@ -54,15 +124,12 @@ if(dim(res)[1] == 0){
 ```
 
 ## GO Analysis Biological Processes
-Significantly down regulated genes
+`r bp_message`
 
 ```{r go_bp_plot, out.width="90%", message=F, warning=F}
-res <- read_tsv(paste0(snakemake@scriptdir, "/../results/", exp, "/GO/all_down_genes_BP_results.txt"))
 
-if(dim(res)[1] == 0){
-	print("No plot was created for Biological processes")
-} else {
-	include_graphics(paste0(snakemake@scriptdir, "/../results/", exp, "/GO/all_down_genes_BP_dot.png"))
+if(showBP){
+	include_graphics(bp_pic)
 }
 
 
@@ -70,16 +137,13 @@ if(dim(res)[1] == 0){
 
 
 ## GO Analysis Cellular Components
-Significant genes
+`r cc_message`
 
 ```{r go_cc_table, message=F, warning=F}
-res <- read_tsv(paste0(snakemake@scriptdir, "/../results/", exp, "/GO/all_genes_CC_results.txt"))
 
-if(dim(res)[1] == 0){
-	print("No significant ontological terms were found for Cellular Components")
-} else {
-	res <- res %>% select(ID, Description, GeneRatio, BgRatio, p.adjust)
-	datatable(res, filter='bottom', options = list(pageLength=10, lengthMenu = c(5, 10, 25), scrollX=T)) %>% 
+if(showCC){
+	cc_res <- cc_res %>% select(ID, Description, GeneRatio, BgRatio, p.adjust)
+	datatable(cc_res, filter='bottom', options = list(pageLength=10, lengthMenu = c(5, 10, 25), scrollX=T)) %>% 
 		formatRound('p.adjust', 3)
 	#	formatRound('baseMean', 0)
 	
@@ -88,16 +152,26 @@ if(dim(res)[1] == 0){
 ```
 
 ## GO Analysis Cellular Components
-Significant genes
+`r cc_message`
 
 ```{r go_cc_plot, out.width="95%", message=F, warning=F}
-res <- read_tsv(paste0(snakemake@scriptdir, "/../results/", exp, "/GO/all_genes_BP_results.txt"))
 
-if(dim(res)[1] == 0){
-	print("No plot was created for cellular components")
-} else {
-	include_graphics(paste0(snakemake@scriptdir, "/../results/", exp, "/GO/all_genes_CC_GO_graph.png"))
+if(showCC){
+	include_graphics(cc_pic)
 }
+
+```
+
+```{r go_cleanup, include=F}
+
+# Remove variables used, to free up a little space
+
+rm(mf_res)
+rm(mf_pic)
+rm(bp_res)
+rm(bp_pic)
+rm(cc_res)
+rm(cc_pic)
 
 
 ```
