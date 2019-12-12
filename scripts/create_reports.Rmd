@@ -24,7 +24,7 @@ library(pheatmap)
 library(knitr)
 library(DT)
 library(kableExtra)
-
+library(ggiraph)
 
 # Read dds
 exp <- snakemake@params$exp
@@ -201,11 +201,36 @@ datatable(tableToShow, filter='bottom', options = list(pageLength=10, lengthMenu
 
 
 
-
+<!-- This is the easy way to do a MA plot. Below
+     is the hard way
 ## MA Plot
 ```{r maplot}
 plotMA(dds)
 ```
+-->
+
+## MA Plot
+```{r maplot_interactive}
+
+sigUp   <- sig %>% filter(log2FoldChange > 0)
+sigDown <- sig %>% filter(log2FoldChange < 0)
+sigUp   <- sigUp %>% mutate(onClick = sprintf("window.open(\"%s%s\")","https://www.genecards.org/cgi-bin/carddisp.pl?gene=", GeneName))
+sigDown <- sigDown %>% mutate(onClick = sprintf("window.open(\"%s%s\")","https://www.genecards.org/cgi-bin/carddisp.pl?gene=", GeneName))
+
+
+# Make the plot
+ma_plot <- ggplot(res, aes(log2(baseMean), log2FoldChange)) + geom_point(color='grey', alpha=0.5, pch=1)  +
+	geom_point_interactive(data=sigUp, color='darkmagenta', aes(tooltip=GeneName, onclick=onClick)) +
+	geom_point_interactive(data=sigDown, color='darkgoldenrod2', aes(tooltip=GeneName, onclick=onClick)) +
+	theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+	labs(x='Log Expression', y='Log Fold Change')
+
+# Make it interactive
+girafe(code = print(ma_plot) )
+
+```
+
+
 
 <!--  Remove this section 
 ## Sample Distance
