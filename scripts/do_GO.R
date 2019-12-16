@@ -74,8 +74,20 @@ myGoFunc <- function(geneList, prefix, ontology){
 	saveRDS(ego_s, file=paste0(outDir, prefix, ontology, '_ego_object.rds'))
 	
 	# Draw several plots
-	p <- goplot(ego_s)
-	ggsave(p, filename=paste0(outDir, prefix, ontology, '_GO_graph.png' ))
+	
+	
+	# goplot sometimes throws an error (subscript out of bounds)
+	tmp <- tryCatch(
+		expr = {
+			gp <- goplot(ego_s)
+			ggsave(gp, filename=paste0(outDir, prefix, ontology, '_GO_graph.png' ))
+		},
+		error=function(e){
+			gp <- ggplot() + labs(title="Unable to draw plot")
+			ggsave(gp, filename=paste0(outDir, prefix, ontology, '_GO_graph.png' ))
+		}
+	)
+
 	
 	p <- barplot(ego_s, showCategory = 40)
 	ggsave(p, filename=paste0(outDir, prefix, ontology, '_bar.png' ), height=5, width=10)

@@ -210,14 +210,20 @@ plotMA(dds)
 -->
 
 ## MA Plot
-```{r maplot_interactive}
+```{r maplot_interactive, out.width="60%"}
 
 sigUp   <- sig %>% filter(log2FoldChange > 0)
 sigDown <- sig %>% filter(log2FoldChange < 0)
-sigUp   <- sigUp %>% mutate(onClick = sprintf("window.open(\"%s%s\")","https://www.genecards.org/cgi-bin/carddisp.pl?gene=", GeneName))
-sigDown <- sigDown %>% mutate(onClick = sprintf("window.open(\"%s%s\")","https://www.genecards.org/cgi-bin/carddisp.pl?gene=", GeneName))
+sigUp   <- sigUp %>% mutate(onClick = sprintf("window.open(\"%s%s\")","https://www.ensembl.org/id/", GeneID))
+sigDown <- sigDown %>% mutate(onClick = sprintf("window.open(\"%s%s\")","https://www.ensembl.org/id/", GeneID))
+
+#sigUp   <- sigUp %>% mutate(onClick = sprintf("window.open(\"%s%s\")","https://www.genecards.org/cgi-bin/carddisp.pl?gene=", GeneName))
+#sigDown <- sigDown %>% mutate(onClick = sprintf("window.open(\"%s%s\")","https://www.genecards.org/cgi-bin/carddisp.pl?gene=", GeneName))
+# Would need ENTREZID, but this might be best
+#sigDown <- sigDown %>% mutate(onClick = sprintf("window.open(\"%s%s\")","https://www.ncbi.nlm.nih.gov/gene/", ENTREZID))
 
 
+	
 # Make the plot
 ma_plot <- ggplot(res, aes(log2(baseMean), log2FoldChange)) + geom_point(color='grey', alpha=0.5, pch=1)  +
 	geom_point_interactive(data=sigUp, color='darkmagenta', aes(tooltip=GeneName, onclick=onClick)) +
