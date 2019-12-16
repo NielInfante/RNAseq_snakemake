@@ -5,18 +5,24 @@ To use this pipeline, create a new repo using this one as a template (click the 
 
 ### Set up Environment
 
-Now, you need to confirm all the needed software is installed. The easiest way to do this is to install [miniconda](https://docs.conda.io/en/latest/miniconda.html), then create a conda environment to run in. I suggest:
+Now, you need to install all the needed software. The easiest way to do this is to install [miniconda](https://docs.conda.io/en/latest/miniconda.html), and run using the --use-conda option. To create a minimal environment, which is just enough to run Snakemake, use
 
 ```{sh}
-conda env create -f envs/snake_no_conda.yaml
+conda env create -f envs/snake.yaml
 ```
 
-This will create a conda environment called snake_no_conda. If you want a different name, change it in the yaml file before creating.
+This will create a conda environment called snake, if you want a different name, change it in the yaml file before creating. The you can activate it by:
+```{sh}
+conda activate snake
+```
+The environment snake_no_conda should have everything needed to execute all the steps, but it has not been tested extensively, and on some systems it will not install at all.
 
 
-### Set up Config and Metadata
+### Set up Config File and Metadata
 
-You will need to create a metadata file for the samples.
+#### You will need to create a metadata file for the samples.
+The metadata file should be a tab delimited file with a line for each sample. There should be a column the gives the sample ID which matches the sample ID in the configuration file.
+
 
 You will need to create a configuration file.
 
@@ -54,6 +60,28 @@ experiments:
 		display_column: Sample
 
 ```
+
+
+
+| H1 | H2 | H3 |
+| ---- | ---- | --- |
+| Hey| `trey this`<br>`Too` | and this |
+
+| Format   | Tag example |
+| -------- | ----------- |
+| Headings | =heading1=<br>==heading2==<br>===heading3=== |
+| New paragraph | A blank line starts a new paragraph |
+| Source code block |  // all on one line<br> {{{ if (foo) bar else   baz }}} |
+
+
+| Tables        | Are           | Cool  |
+| ------------- |:-------------:| -----:|
+| col 3 is      | right-aligned | $1600 |
+| col 2 is      | centered      |   $12 |
+| zebra stripes | are neat      |    $1 |
+| <ul><li>item1</li><li>item2</li></ul>| See the list | from the first column|
+
+
 For each sample, list the sample name, as well as the forward and reverse reads file. If you have a lot of files, you may find the following shell command helpful:
 
 ```{sh}
