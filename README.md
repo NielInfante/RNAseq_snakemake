@@ -23,7 +23,7 @@ The environment snake_no_conda should have everything needed to execute all the 
 The metadata file should be a tab delimited file with a line for each sample. There should be a column the gives the sample ID which matches the sample ID in the configuration file.
 
 
-You will need to create a configuration file.
+#### You will need to create a configuration file.
 
 The configuration file format is:
 ```
@@ -127,11 +127,6 @@ done</pre><br>Note the spacing is important to get the indent levels correct. Al
 		<th colspan="3"> Experiment Parameters</th>
 	</tr>
 	<tr>
-		<td><pre></pre></td>
-		<td><pre></pre></td>
-		<td></td>
-	</tr>
-	<tr>
 		<td><pre>prefix:</pre></td>
 		<td><pre>120d</pre></td>
 		<td>A repeat of the experiment name. Output folders will have this name.</td>
@@ -167,38 +162,33 @@ done</pre><br>Note the spacing is important to get the indent levels correct. Al
 
 
 
-The reference base should be in the Data folder, it should be a fasta file with all the transcripts you wish to consider. It should have a suffix of .fa.
 
-
-
-The metadata file should be tab delimited. There should be a column that matches the sample names listed in the config file; specify this with the sample_column parameter.
-
-For each different contrast you want to do, list a separate experiment. Filter should be standard dplyr format, to select just the samples you want. PCA_Group specifies how samples will be colored in cerain plots. Design and contrast are input into DESeq. design can be an aribitray R formula. Display_column is if you wish to have samples labeled by something other than sample name in output figures.
-
-Use the files meta.txt and config.yaml as guides.
-
-Reference transcriptome should be put in a folder called Data, and its name referenced in the config file. Note the file should have a suffix of .fa, which is not included in the config file.
 
 ### To Run the Analysis
 
 ```{sh}
-conda activate snake_no_conda
+conda activate snake
 
 snakemake -n
-snakemake --cores 32
+nohup snakemake --cores 32 --use-conda -k &
 
 conda deactivate
 ```
 
-The first snakemake command is a dry run, which will build the dag and determine which jobs will need to be run. This is good practice, and helps trouble shoot issues with the config file or filenames. The second snakemake command will run the pipeline. Specify how many cores you want to use.
+The first snakemake command is a dry run, which will build the dag and determine which jobs will need to be run. This is good practice, and helps trouble shoot issues with the config file or filenames. The second snakemake command will run the pipeline. Specify how many cores you want to use. --use-conda tells snakemake to create a conda environment for each step. -k is an instruction to run as many independent jobs as possible if some of the jobs fail. I prefer the ease of nohup, but use screen, tmux, or whatever you like, it should have no effect on how the jobs run.
 
-### The Results
+## The Results
 
-A quality report will be in the QC folder.
+Two folders will be created, one called QC and the other results.
 
-For each contrast, a separate folder is created under deseq. In each folder, there are files for all results, significant results, and an html report with figures.
+#### QC
+`report.html` is the multiqc report on read and quantification quality.
+`FastQC` is a directory that includes individual FastQC reports for each sample.
 
+#### results
 
-### The Pipeline
+For each contrast, a separate folder is created named with the experiment prefix. In this folder is a self contained html report which gives an overview of the results, and shows some figures. Also created under each experiment folder are three sub folders, deseq, GO, and KEGG. These contain output tables and several figures.
+
+## The Pipeline
 
 ![dag](dag.svg)
