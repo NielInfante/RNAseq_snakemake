@@ -13,7 +13,7 @@
   </tr>
   <tr>
     <td>Eve</td>
-    <td>Jackson</td>
+    <td>Jackson this line is very long. Will it wrap automatically, or will I have to put manual line breaks in? I'm not sure, so that's why I'm testing things, to see if it wlll wrap automattically or not..  WExtra characters are not a bad thing here. More is better.</td>
     <td>94</td>
   </tr>
 </table>
