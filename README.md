@@ -1,24 +1,5 @@
 # Snakefile, config and scripts to run an RNA seq analysis
 
-<table style="width:100%">
-  <tr>
-    <th>Firstname</th>
-    <th>Lastname</th>
-    <th>Age</th>
-  </tr>
-  <tr>
-    <td>Jill</td>
-    <td>Smith</td>
-    <td>50</td>
-  </tr>
-  <tr>
-    <td>Eve</td>
-    <td>Jackson this line is very long. Will it wrap automatically, or will I have to put manual line breaks in? I'm not sure, so that's why I'm testing things, to see if it wlll wrap automattically or not..  WExtra characters are not a bad thing here. More is better.</td>
-    <td>94</td>
-  </tr>
-</table>
-
-
 To use this pipeline, create a new repo using this one as a template (click the Use Template button).
 
 ### Set up Environment
