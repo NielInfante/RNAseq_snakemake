@@ -62,9 +62,37 @@ experiments:
 
 
 
-| H1 | H2 | H3 |
+| Item | Example | Comment |
 | ---- | ---- | --- |
-| Hey| `trey this`<br>`Too` | and this |
+| `samples:` | `Con_1:`<br>&nbsp`; Too` | and this |
+
+
+<table style="width:100%">
+  <tr>
+    <th>Item</th>
+    <th>Example</th>
+    <th>Comment</th>
+  </tr>
+  <tr>
+    <td>samples:</td>
+    <td><pre>Con1:
+  F: Con_1_1.fq.gz
+  R: Con_1_2.fq.gz</pre></td>
+    <td>Sample name, followed by the forward and reverse file names. If you have a lot of files, you may find the following shell command helpful, assuming the files look like {sample_name}_R1.fastq.gz:<br><pre>for f in *R1*; do nm=${f%_R*};
+ echo "  ${nm}:";
+ echo "    F: $f";
+ echo "    R: ${f/R1/R2}";
+done</pre><br>Note the spacing is important to get the indent levels correct. Also note that you should avoid using an integer as the sample name, this will likely cause issues.</td>
+  </tr>
+  <tr>
+    <td>Eve</td>
+    <td>Jackson</td>
+    <td>94</td>
+  </tr>
+</table>
+
+
+Con_1:<br>&nbsp;&nbsp;&nbsp;&nbsp;F: Con_1_1.fq.gz<br>&nbsp;&nbsp;&nbsp;&nbsp;R: Con_1_2.fq.gz
 
 | Format   | Tag example |
 | -------- | ----------- |
@@ -90,7 +118,7 @@ For each sample, list the sample name, as well as the forward and reverse reads 
 
 ```
 
-Note the spacing is important to get the indent levels correct. Also note that you should avoid using an integer as the sample name, this will likely cause issues.
+
 
 The reference base should be in the Data folder, it should be a fasta file with all the transcripts you wish to consider. It should have a suffix of .fa.
 
