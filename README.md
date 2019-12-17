@@ -61,12 +61,6 @@ experiments:
 ```
 
 
-
-| Item | Example | Comment |
-| ---- | ---- | --- |
-| `samples:` | `Con_1:`<br>&nbsp`; Too` | and this |
-
-
 <table style="width:100%">
   <tr>
     <th>Item</th>
