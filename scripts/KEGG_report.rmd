@@ -4,13 +4,17 @@ KEGG Pathways in which significant genes are overrepresented.
 ```{r kegg_over, message=F, warning=F}
 
 res <- read_tsv(paste0("results/", exp, "/KEGG/KEGG_results.txt"))
+res <- read_tsv(paste0("results/", exp, "/KEGG/KEGG_results.txt"))
+if (res[1,1] == 'No Results') {
+	cat("No KEGG pathways in which significant genes were overrepresented")
+} else {
 
-res <- res %>% dplyr::select(-geneID)
-datatable(res, filter='bottom', options = list(pageLength=10, lengthMenu = c(5, 10, 25), scrollX=T)) %>% 
-	formatRound('p.adjust', 3) %>% 
-	formatRound('pvalue', 3) %>% 
-	formatRound('qvalue', 3)
-
+	res <- res %>% dplyr::select(-geneID)
+	datatable(res, filter='bottom', options = list(pageLength=10, lengthMenu = c(5, 10, 25), scrollX=T)) %>% 
+		formatRound('p.adjust', 3) %>% 
+		formatRound('pvalue', 3) %>% 
+		formatRound('qvalue', 3)
+}
 
 ```
 
@@ -18,9 +22,13 @@ datatable(res, filter='bottom', options = list(pageLength=10, lengthMenu = c(5, 
 KEGG Pathways in which significant genes are overrepresented.
 
 ```{r kegg_over_plot,  out.width="65%", message=F, warning=F}
+res <- read_tsv(paste0("results/", exp, "/KEGG/KEGG_results.txt"))
+if (res[1,1] == 'No Results') {
+	cat("No KEGG pathways inwhich significant genes were overrepresented")
+} else {
 
-include_graphics(paste0(snakemake@scriptdir, "/../results/", exp, "/KEGG/over_overview_dot.png"))
-
+	include_graphics(paste0(snakemake@scriptdir, "/../results/", exp, "/KEGG/over_overview_dot.png"))
+}
 ```
 
 ## KEGG Gene Set Enrichment Analysis
