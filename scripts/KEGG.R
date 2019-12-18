@@ -39,17 +39,25 @@ geneList <- genes$ENTREZID
 # Overrepresentation Test
 kegg_over <- enrichKEGG(gene=geneList, organism=kegg_db, pvalueCutoff = 0.05)
 
-print(paste("Got", nrow(kegg_over@result), 'sig stuff'))
-kegg_res <- kegg_over@result
-kegg_res <- filter(kegg_res, p.adjust < 0.05)
 
-write_tsv(kegg_res, paste0(outDir, 'KEGG_results.txt'))
+if(is.null(kegg_over)){   # No Results
+	d <- tibble(ID = c('No Results'))
+	write_tsv(d, paste0(outDir, 'KEGG_results.txt'))
+	
+	
+} else {	 # Got Results
+	
+	print(paste("Got", nrow(kegg_over@result), 'sig stuff'))
+	kegg_res <- kegg_over@result
+	kegg_res <- filter(kegg_res, p.adjust < 0.05)
 
-p <- dotplot(kegg_over)
-ggsave(p, filename=paste0(outDir, "over_overview_dot.png"))
-p <- barplot(kegg_over)
-ggsave(p, filename=paste0(outDir, "over_overview_bar.png"))
+	write_tsv(kegg_res, paste0(outDir, 'KEGG_results.txt'))
 
+	p <- dotplot(kegg_over)
+	ggsave(p, filename=paste0(outDir, "over_overview_dot.png"))
+	p <- barplot(kegg_over)
+	ggsave(p, filename=paste0(outDir, "over_overview_bar.png"))
+}
 # GSEA
 
 # Get list of all genes
@@ -77,6 +85,12 @@ names(geneList) <- genes$ENTREZID
 kegg_gsea <- gseKEGG(geneList = geneList, keyType='ncbi-geneid',organism=kegg_db, nPerm=1000, 
 										 minGSSize=50, pvalueCutoff=0.05, verbose=F)
 
+
+if(is.null(kegg_gsea) | is.null(kegg_gsea@result)){
+	d <- tibble(no_genes = character())
+	write_tsv(d, paste0(outDir, 'KEGG_GSEA_results.txt'))
+	return
+}
 
 kegg_res <- as_tibble(kegg_gsea@result)
 
